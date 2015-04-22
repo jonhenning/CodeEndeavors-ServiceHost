@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
+    <PropertyGroup>
+        <ExternalClientName>CodeEndeavors.ServiceHost</ExternalClientName>
+        <DeployDir></DeployDir>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
+        <RedistDir>$(RootDir)\redist</RedistDir>
+        <CommonLibDir>$(RootDir)\lib</CommonLibDir>
+    </PropertyGroup>
+
+    <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
+
+    <Target Name="AfterBuild">
+        <CallTarget Targets="CreateSetupPackage" />
+        <CallTarget Targets="DeployPackage" />
+    </Target>
+
+    <Target Name="CleanRedistDir">
+        <MakeDir Directories="$(RedistDir)"/>
+
+        <CreateItem Include="$(RedistDir)\$(ExternalClientName).zip;$(RedistDir)\$(ExternalClientName).dll;">
+            <Output TaskParameter="Include" ItemName="ExistingSetups" />
+        </CreateItem>
+        <Delete Files="@(ExistingSetups)" TreatErrorsAsWarnings="true" />
+    </Target>
+
+    <Target Name="CreateSetupPackage" DependsOnTargets="CleanRedistDir">
+        <Zip Files="$(TargetDir)\$(ExternalClientName).dll;$(TargetDir)\CodeEndeavors.ServiceHost.Common.dll" WorkingDirectory="$(TargetDir)\" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+        <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+    </Target>
+    <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
+        <MakeDir Directories="$(DeployDir)\bin" />
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
+        <Copy SourceFiles="$(TargetDir)\CodeEndeavors.ServiceHost.Common.dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
+    </Target>
+
+</Project>

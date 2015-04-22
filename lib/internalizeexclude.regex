@@ -1,0 +1,4 @@
+﻿.*\.Shared\..*
+.*\.DomainObjects\..*
+.*\.LoggingServices\..*
+.*\.ServiceHost.Common.Services\..*

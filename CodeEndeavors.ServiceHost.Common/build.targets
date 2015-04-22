@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
+    <PropertyGroup>
+        <ProjectFullName>CodeEndeavors.ServiceHost.Common</ProjectFullName>
+        <InternalizedDlls>ICSharpCode.SharpZipLib.dll log4net.dll</InternalizedDlls>
+        <DeployDir></DeployDir>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
+        <RedistDir>$(RootDir)\redist</RedistDir>
+        <CommonLibDir>$(RootDir)\lib</CommonLibDir>
+    </PropertyGroup>
+
+    <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
+
+    <Target Name="AfterBuild">
+        <CallTarget Targets="InternalizeDependencies" />
+        <CallTarget Targets="CreateSetupPackage" />
+        <CallTarget Targets="DeployPackage" />
+    </Target>
+
+    <Target Name="InternalizeDependencies" DependsOnTargets="CleanRedistDir">
+        <CallTarget Targets="CleanRedistDir" />
+        <Exec Command="&quot;$(CommonLibDir)\ILMerge.exe&quot; /log $(ILMergeTargetPlatform) /internalize:&quot;$(CommonLibDir)\internalizeexclude.regex&quot; /out:&quot;$(RedistDir)\$(ProjectFullName).dll&quot; &quot;$(ProjectFullName).dll&quot; $(InternalizedDlls)" WorkingDirectory="$(TargetDir)" />
+    </Target>
+
+    <Target Name="CleanRedistDir">
+        <MakeDir Directories="$(RedistDir)"/>
+
+        <CreateItem Include="$(RedistDir)\$(ProjectFullName).zip;$(RedistDir)\$(ProjectFullName).dll;">
+            <Output TaskParameter="Include" ItemName="ExistingSetups" />
+        </CreateItem>
+        <Delete Files="@(ExistingSetups)" TreatErrorsAsWarnings="true" />
+    </Target>
+
+    <Target Name="CreateSetupPackage" DependsOnTargets="CleanRedistDir">
+        <Zip Files="$(RedistDir)\$(ProjectFullName).dll;" WorkingDirectory="$(RedistDir)\" ZipFileName="$(RedistDir)\$(ProjectFullName).zip" />
+    </Target>
+    <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
+        <MakeDir Directories="$(DeployDir)\bin" />
+        <Copy SourceFiles="$(RedistDir)\$(ProjectFullName).dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
+    </Target>
+
+</Project>
