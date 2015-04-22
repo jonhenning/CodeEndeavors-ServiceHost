@@ -39,8 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CodeEndeavors.Extensions">
-      <HintPath>..\packages\CodeEndeavors.Extensions.1.0.7\lib\4.0\CodeEndeavors.Extensions.dll</HintPath>
+    <Reference Include="CodeEndeavors.Extensions, Version=1.0.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\CodeEndeavors.Extensions.1.0.9\lib\4.0\CodeEndeavors.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="CodeEndeavors.ServiceHost.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
