@@ -3,7 +3,7 @@
     <metadata>
         <id>CodeEndeavors.ServiceHost</id>
         <version>1.0.0</version>
-        <title>Code Endeavors Service Host</title>
+        <title>Code Endeavors ServiceHost</title>
         <authors>Jon Henning</authors>
         <owners>Code Endeavors Inc.</owners>
         <projectUrl>https://github.com/jonhenning/CodeEndeavors-ServiceHost</projectUrl>

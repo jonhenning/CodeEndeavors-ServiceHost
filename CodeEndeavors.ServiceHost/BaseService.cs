@@ -16,7 +16,7 @@ namespace CodeEndeavors.ServiceHost
         private Configuration _config;
         private ServiceLogger _logger;
         private string _satilliteName;
-        private string _serviceLogKey;
+        protected string _serviceLogKey;
         protected Configuration Config
         {
             get
