@@ -110,8 +110,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services.LoggingServices
                     _logGlobalContext = typeof(log4net.GlobalContext);
                 }
                 else
-                    _logType = LoggingType.Global;
-
+                    _logType = LoggingType.Internal;
             }
         }
 

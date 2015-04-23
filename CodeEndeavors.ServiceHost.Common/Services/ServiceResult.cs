@@ -11,6 +11,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public double ExecutionTime;
         public string StatusMessage;
         public bool Success;
+        public string LoggerKey;
         private List<string> _errors;
         private List<string> _messages;
         private Stopwatch _watch;
@@ -65,12 +66,13 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             bool isDebugEnabled = Log.IsDebugEnabled;
             if (isDebugEnabled)
             {
-                Log.Debug(this.ToString());
+                Log.Debug(this.ToString(), LoggerKey);
             }
         }
         public void AddException(Exception ex)
         {
-            this.Errors.Add(ex.Message);
+            Log.Error(ex.ToString(), LoggerKey);
+            this.Errors.Add(ex.ToString());
         }
         public void StartTimer()
         {

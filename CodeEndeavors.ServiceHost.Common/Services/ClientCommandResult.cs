@@ -13,6 +13,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		public TimeSpan ExecutionTime;
 		public TimeSpan ServerExecutionTime;
 		public string StatusMessage;
+        public string LoggerKey;
 		public bool Success;
 		private List<string> _errors;
 		private List<string> _messages;
@@ -63,7 +64,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			bool isDebugEnabled = Log.IsDebugEnabled;
 			if (isDebugEnabled)
 			{
-				Log.Debug(this.ToString());
+				Log.Debug(this.ToString(), this.LoggerKey);
 			}
 		}
 		public void ReportResult(ServiceResult<T> Result, bool Success)
@@ -76,7 +77,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			bool isDebugEnabled = Log.IsDebugEnabled;
 			if (isDebugEnabled)
 			{
-				Log.Debug(this.ToString());
+                Log.Debug(this.ToString(), this.LoggerKey);
 			}
 		}
 		public void ReportResult(ClientCommandResult<T> Result, bool Success)
@@ -89,7 +90,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			bool isDebugEnabled = Log.IsDebugEnabled;
 			if (isDebugEnabled)
 			{
-				Log.Debug(this.ToString());
+                Log.Debug(this.ToString(), this.LoggerKey);
 			}
 		}
 		public void ReportResult<T2>(ClientCommandResult<T2> Result, T Data, bool Success)
@@ -102,12 +103,13 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			bool isDebugEnabled = Log.IsDebugEnabled;
 			if (isDebugEnabled)
 			{
-				Log.Debug(this.ToString());
+                Log.Debug(this.ToString(), this.LoggerKey);
 			}
 		}
 		public void AddException(Exception ex)
 		{
-			this.Errors.Add(ex.Message);
+            Log.Error(ex.ToString(), this.LoggerKey);
+			this.Errors.Add(ex.ToString());
 		}
 		public void StartTimer()
 		{

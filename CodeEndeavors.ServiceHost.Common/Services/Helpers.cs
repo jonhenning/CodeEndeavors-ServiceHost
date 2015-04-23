@@ -30,7 +30,13 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
         public static ServiceResult<T> ExecuteServiceResult<T>(ServiceResultHandler<T> codeFunc) where T : new()
         {
+            return ExecuteServiceResult<T>(null, codeFunc);
+        }
+
+        public static ServiceResult<T> ExecuteServiceResult<T>(string loggerKey, ServiceResultHandler<T> codeFunc) where T : new()
+        {
             var result = new ServiceResult<T>(true);
+            result.LoggerKey = loggerKey;
             try
             {
                 codeFunc.Invoke(result);

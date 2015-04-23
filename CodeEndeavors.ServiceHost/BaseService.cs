@@ -16,6 +16,7 @@ namespace CodeEndeavors.ServiceHost
         private Configuration _config;
         private ServiceLogger _logger;
         private string _satilliteName;
+        private string _serviceLogKey;
         protected Configuration Config
         {
             get
@@ -59,6 +60,7 @@ namespace CodeEndeavors.ServiceHost
         protected void Configure(string logConfigFileName, string serviceLogKey)
         {
             this._callingAssembly = System.Reflection.Assembly.GetCallingAssembly();
+            _serviceLogKey = serviceLogKey;
             this._logger = new ServiceLogger(logConfigFileName, serviceLogKey);
             this.Logger.Info(string.Format("{0} Service configured", base.GetType().ToString()));
             bool flag = !string.IsNullOrEmpty(logConfigFileName);
@@ -67,6 +69,11 @@ namespace CodeEndeavors.ServiceHost
                 HttpLogger.HttpLogConfigFileName = logConfigFileName;
             }
             GlobalHttpModule.Application_Error += new GlobalHttpModule.ApplicationErrorHandler(this.Application_Error);
+        }
+
+        protected ServiceResult<T> ExecuteServiceResult<T>(Helpers.ServiceResultHandler<T> codeFunc) where T : new()
+        {
+            return Helpers.ExecuteServiceResult<T>(_serviceLogKey, codeFunc);
         }
 
         protected string GetConnectionString(string key, string defaultValue)

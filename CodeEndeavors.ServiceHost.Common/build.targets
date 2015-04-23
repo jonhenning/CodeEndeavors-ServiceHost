@@ -4,7 +4,10 @@
     <PropertyGroup>
         <ProjectFullName>CodeEndeavors.ServiceHost.Common</ProjectFullName>
         <InternalizedDlls>ICSharpCode.SharpZipLib.dll log4net.dll</InternalizedDlls>
-        <DeployDir></DeployDir>
+        <ProgramFiles32 Condition="Exists('$(PROGRAMFILES) (x86)')">$(PROGRAMFILES) (x86)</ProgramFiles32>
+        <ProgramFiles32 Condition="$(ProgramFiles32) == ''">$(PROGRAMFILES)</ProgramFiles32>
+        <ILMergeTargetPlatform>/targetplatform:v4,"$(PROGRAMFILES)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client"</ILMergeTargetPlatform>
+      <DeployDir></DeployDir>
     </PropertyGroup>
     
     <PropertyGroup>
