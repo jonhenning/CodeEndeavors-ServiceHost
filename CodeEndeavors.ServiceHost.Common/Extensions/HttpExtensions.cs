@@ -78,11 +78,11 @@ namespace CodeEndeavors.ServiceHost.Extensions
         }
         public static void WriteJSON(HttpResponse response, object data)
         {
-            response.Write(RuntimeHelpers.GetObjectValue(data).ToJson());
+            response.Write(RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true));
         }
         public static void WriteCompressedJSON(HttpResponse response, object data, ref ZipPayload zip)
         {
-            zip = ConversionExtensions.ToCompress(RuntimeHelpers.GetObjectValue(data).ToJson());
+            zip = ConversionExtensions.ToCompress(RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true));
             response.BinaryWrite(zip.Bytes);
         }
         public static void WriteText(WebRequest request, byte[] body)

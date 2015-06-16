@@ -76,7 +76,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 					for (int i = 0; i < Body.Length; i++)
 					{
 						object oItem = RuntimeHelpers.GetObjectValue(Body[i]);
-						oBodyList.Add(RuntimeHelpers.GetObjectValue(oItem).ToJson());
+                        oBodyList.Add(RuntimeHelpers.GetObjectValue(oItem).ToJson(false, null, true));
 					}
 				}
 				return this.GetHttpRequestObject<T>(Url, oBodyList, compressedRequest, compressedResponse);
@@ -84,7 +84,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		}
 		public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
 		{
-			string sJsonRequest = RuntimeHelpers.GetObjectValue(body).ToJson();
+            string sJsonRequest = RuntimeHelpers.GetObjectValue(body).ToJson(false, null, true);
 			bool flag = compressedRequest && !string.IsNullOrEmpty(sJsonRequest);
 			string jsonResponse;
 			if (flag)
@@ -225,7 +225,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 						req.Method = "POST";
 						this._cookieJar = new CookieContainer();
 						req.CookieContainer = this._cookieJar;
-						CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(req, ConversionExtensions.ToCompress(formFields.ToJson()).Bytes);
+                        CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(req, ConversionExtensions.ToCompress(formFields.ToJson(false, null, true)).Bytes);
 						var res = (HttpWebResponse)req.GetResponse();
 					}
 				}
