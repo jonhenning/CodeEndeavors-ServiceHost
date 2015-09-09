@@ -72,7 +72,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public void AddException(Exception ex)
         {
             Log.Error(ex.ToString(), LoggerKey);
-            this.Errors.Add(ex.ToString());
+            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
+                this.Errors.Add(ex.ToString());
+            else
+                this.Errors.Add(ex.Message);
         }
         public void StartTimer()
         {
