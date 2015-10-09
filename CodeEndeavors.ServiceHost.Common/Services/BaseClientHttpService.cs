@@ -95,7 +95,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			}
 			else
 			{
-				jsonResponse = this.GetResponse(url, sJsonRequest, this.HttprequestTimeout, Encoding.UTF8, string.Empty, compressedRequest, compressedResponse);
+				jsonResponse = this.GetResponse(url, sJsonRequest, this.HttprequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
 			}
 			return jsonResponse.ToObject<T>();
 		}
