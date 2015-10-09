@@ -11,7 +11,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
     {
         static ServiceLocator()
         {
-            RestfulServerExtension = ".mvc";
+            RestfulServerExtension = ""; // ".mvc";
             DefaultHttpRequestTimeOut = 10000;
         }
 
