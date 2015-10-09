@@ -10,6 +10,8 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
+using System.Web.Http;
+using CodeEndeavors.ServiceHost.Areas.HelpPage;
 
 namespace CodeEndeavors.ServiceHost
 {
@@ -32,7 +34,16 @@ namespace CodeEndeavors.ServiceHost
                 //log4net.LogManager.GetLogger("");   //fairly confident we need this to ensure global logger is used.
                 Log.Configure("ServiceHostServicesLogger");  //configure generic logger for all ServiceHost services
 
+                var formatters = GlobalConfiguration.Configuration.Formatters;
+                formatters.Remove(formatters.XmlFormatter);
+
+                formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
                 RegisterRoutes(RouteTable.Routes);
+                AreaRegistration.RegisterAllAreas();
+                GlobalConfiguration.Configure(WebApiConfig.Register);
+                FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+
             }
         }
         public void Dispose() { }

@@ -58,6 +58,19 @@ namespace CodeEndeavors.ServiceHost.Extensions
             zip = ConversionExtensions.ToDecompress(response.GetResponseStream());
             return ConversionExtensions.ToString(zip.Bytes);
         }
+
+        public static string GetTextDecompressedBase64(WebResponse response, ref ZipPayload zip)
+        {
+            var text = GetText(response);
+
+            //text is prefixed and suffixed with a quote... remove
+            text = text.TrimStart('"').TrimEnd('"');
+
+            var bytes = Convert.FromBase64String(text);
+            zip = ConversionExtensions.ToDecompress(bytes);
+            return ConversionExtensions.ToString(zip.Bytes);
+        }
+
         public static string GetText(HttpRequest request)
         {
             StreamReader reader = new StreamReader(request.InputStream);
@@ -78,7 +91,8 @@ namespace CodeEndeavors.ServiceHost.Extensions
         }
         public static void WriteJSON(HttpResponse response, object data)
         {
-            response.Write(RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true));
+            var body = RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true);
+            response.Write(body);
         }
         public static void WriteCompressedJSON(HttpResponse response, object data, ref ZipPayload zip)
         {

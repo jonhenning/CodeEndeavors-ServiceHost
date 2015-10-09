@@ -11,6 +11,9 @@ namespace CodeEndeavors.ServiceHost.Controllers
 {
     public class ServiceHostAuthController : BaseController
     {
+        /// <summary>
+        /// Allows service to be authenticated using Basic Auth 
+        /// </summary>
         public void Authenticate()
         {
             System.Collections.Generic.Dictionary<string, string> reqDict = this.DeserializeCompressedRequest<System.Collections.Generic.Dictionary<string, string>>();
@@ -25,11 +28,11 @@ namespace CodeEndeavors.ServiceHost.Controllers
                     var ticket = new System.Web.Security.FormsAuthenticationTicket(reqDict["user"], true, int.MaxValue);
                     var cookie = new System.Web.HttpCookie(System.Web.Security.FormsAuthentication.FormsCookieName, System.Web.Security.FormsAuthentication.Encrypt(ticket));
                     cookie.Expires = ticket.Expiration;
-                    this.Response.SetCookie(cookie);
+                    System.Web.HttpContext.Current.Response.SetCookie(cookie);
                 }
                 else
                 {
-                    this.Response.StatusCode = 403;
+                    System.Web.HttpContext.Current.Response.StatusCode = 403;
                 }
             }
         }

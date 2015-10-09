@@ -8,18 +8,20 @@ using System.Web.Mvc;
 using CodeEndeavors.ServiceHost.Extensions;
 using System.Runtime.CompilerServices;
 using CodeEndeavors.ServiceHost.Common.Services;
+using System.Web.Http;
+using CodeEndeavors.Extensions;
 
 namespace CodeEndeavors.ServiceHost
 {
-    public class BaseController : Controller
+    public class BaseController : ApiController
     {
         // Methods
-        public T DeserializeCompressedRequest<T>()
+        protected T DeserializeCompressedRequest<T>()
         {
             if (System.Web.HttpContext.Current != null)
             {
                 ZipPayload zip = null;
-                T oResult = HttpExtensions.DeserializeCompressedJSON<T>(System.Web.HttpContext.Current.Request, ref zip);
+                T oResult = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.DeserializeCompressedJSON<T>(System.Web.HttpContext.Current.Request, ref zip);
                 if (HttpLogger.Logger.IsDebugEnabled)
                 {
                     HttpLogger.Logger.Debug(zip.GetStatistics());
@@ -29,33 +31,35 @@ namespace CodeEndeavors.ServiceHost
             return default(T);
         }
 
-        public T DeserializeRequest<T>()
+        protected T DeserializeRequest<T>()
         {
             if (System.Web.HttpContext.Current != null)
             {
-                return HttpExtensions.DeserializeJSON<T>(System.Web.HttpContext.Current.Request);
+                return CodeEndeavors.ServiceHost.Extensions.HttpExtensions.DeserializeJSON<T>(System.Web.HttpContext.Current.Request);
             }
             return default(T);
         }
 
-        public T ResolveService<T>()
+        protected T ResolveService<T>()
         {
             return ServiceLocator.Resolve<T>();
         }
 
-        public void WriteJSON(object Data)
+        protected void WriteJSON(object Data)
         {
             this.WriteJSON(RuntimeHelpers.GetObjectValue(Data), false);
         }
 
-        public void WriteJSON(object Data, bool Compressed)
+        protected void WriteJSON(object Data, bool Compressed)
         {
             if (System.Web.HttpContext.Current != null)
             {
+                System.Web.HttpContext.Current.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 if (Compressed)
                 {
                     ZipPayload zip = null;
-                    HttpExtensions.WriteCompressedJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(Data), ref zip);
+
+                    CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteCompressedJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(Data), ref zip);
                     if (HttpLogger.Logger.IsDebugEnabled)
                     {
                         HttpLogger.Logger.Debug(zip.GetStatistics());
@@ -63,10 +67,23 @@ namespace CodeEndeavors.ServiceHost
                 }
                 else
                 {
-                    HttpExtensions.WriteJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(Data));
+                    CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(Data));
                 }
             }
         }
+
+        protected byte[] GetCompressed(object data)
+        {
+            var json = RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true);
+
+            var zip = ConversionExtensions.ToCompress(json);
+            if (HttpLogger.Logger.IsDebugEnabled)
+            {
+                HttpLogger.Logger.Debug(zip.GetStatistics());
+            }
+            return zip.Bytes;
+        }
+
     }
 
 }

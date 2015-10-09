@@ -174,7 +174,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 				if (compressedResponse)
 				{
 					ZipPayload zip = null;
-					responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetTextDecompressed(response, ref zip);
+                    responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetTextDecompressedBase64(response, ref zip);
 					HttpLogger.Logger.Info(zip.GetStatistics());
 				}
 				else
