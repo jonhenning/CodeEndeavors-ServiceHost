@@ -65,26 +65,27 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		{
 			return this.GetHttpRequestObject<T>(Url, null, compressedRequest, compressedResponse);
 		}
-		public T GetHttpRequestObject<T>(string Url, object[] Body, bool compressedRequest, bool compressedResponse)
-		{
-			List<string> oBodyList = new List<string>();
-			bool flag = Body != null;
-			checked
-			{
-				if (flag)
-				{
-					for (int i = 0; i < Body.Length; i++)
-					{
-						object oItem = RuntimeHelpers.GetObjectValue(Body[i]);
-                        oBodyList.Add(RuntimeHelpers.GetObjectValue(oItem).ToJson(false, null, true));
-					}
-				}
-				return this.GetHttpRequestObject<T>(Url, oBodyList, compressedRequest, compressedResponse);
-			}
-		}
+        //public T GetHttpRequestObject<T>(string Url, object[] Body, bool compressedRequest, bool compressedResponse)
+        //{
+        //    List<string> oBodyList = new List<string>();
+        //    bool flag = Body != null;
+        //    checked
+        //    {
+        //        if (flag)
+        //        {
+        //            for (int i = 0; i < Body.Length; i++)
+        //            {
+        //                object oItem = RuntimeHelpers.GetObjectValue(Body[i]);
+        //                oBodyList.Add(RuntimeHelpers.GetObjectValue(oItem).ToJson(false, null, true));
+        //            }
+        //        }
+        //        return this.GetHttpRequestObject<T>(Url, oBodyList.Count == 0 ? null : oBodyList, compressedRequest, compressedResponse);
+        //    }
+        //}
+
 		public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
 		{
-            string sJsonRequest = RuntimeHelpers.GetObjectValue(body).ToJson(false, null, true);
+            string sJsonRequest = body != null ? RuntimeHelpers.GetObjectValue(body).ToJson(false, null, true) : null;
 			bool flag = compressedRequest && !string.IsNullOrEmpty(sJsonRequest);
 			string jsonResponse;
 			if (flag)
