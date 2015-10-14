@@ -4,7 +4,7 @@ using Microsoft.Owin;
 using Owin;
 using System.Configuration;
 using System.Web.Http;
-using System.Web.Mvc;
+//using System.Web.Mvc;
 using Swashbuckle.Application;
 
 [assembly: OwinStartup(typeof(CodeEndeavors.ServiceHost.App_Start.Startup))]
