@@ -17,8 +17,10 @@ namespace CodeEndeavors.ServiceHost
         {
             var thisAssembly = typeof(SwaggerConfig).Assembly;
 
+            var helpUrl = ConfigurationManager.AppSettings.GetSetting("Help.Url", "help");
+
             config
-                .EnableSwagger("docs/{apiVersion}/help", c =>
+                .EnableSwagger("docs/{apiVersion}/" + helpUrl, c =>
                     {
                         // By default, the service root url is inferred from the request used to access the docs.
                         // However, there may be situations (e.g. proxy and load-balanced environments) where this does not
@@ -36,7 +38,7 @@ namespace CodeEndeavors.ServiceHost
                         // hold additional metadata for an API. Version and title are required but you can also provide
                         // additional fields by chaining methods off SingleApiVersion.
                         //
-                        c.SingleApiVersion("v1", "CodeEndeavors.ServiceHost");
+                        c.SingleApiVersion("v1", ConfigurationManager.AppSettings.GetSetting("Help.Title", "Code Endeavors Service Host"));
 
                         // If your API has multiple versions, use "MultipleApiVersions" instead of "SingleApiVersion".
                         // In this case, you must provide a lambda that tells Swashbuckle which actions should be
@@ -176,7 +178,7 @@ namespace CodeEndeavors.ServiceHost
                         //
                         //c.CustomProvider((defaultProvider) => new CachingSwaggerProvider(defaultProvider));
                     })
-                .EnableSwaggerUi("help/{*assetPath}", c =>
+                .EnableSwaggerUi(helpUrl + "/{*assetPath}", c =>
                     {
                         // Use the "InjectStylesheet" option to enrich the UI with one or more additional CSS stylesheets.
                         // The file must be included in your project as an "Embedded Resource", and then the resource's
@@ -231,7 +233,7 @@ namespace CodeEndeavors.ServiceHost
                     });
 
             //https://github.com/domaindrivendev/Swashbuckle/issues/299
-            config.Routes.MapHttpRoute("custom_swagger_ui_shortcut", "help", null, null, new RedirectHandler(SwaggerDocsConfig.DefaultRootUrlResolver, "help/index"));
+            config.Routes.MapHttpRoute("custom_swagger_ui_shortcut", helpUrl, null, null, new RedirectHandler(SwaggerDocsConfig.DefaultRootUrlResolver, helpUrl + "/index"));
 
         }
 
