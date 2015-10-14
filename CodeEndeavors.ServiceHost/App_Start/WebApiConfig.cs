@@ -16,6 +16,10 @@ namespace CodeEndeavors.ServiceHost
             //    defaults: new { id = RouteParameter.Optional }
             //);
 
+            var formatters = config.Formatters;
+            formatters.Remove(formatters.XmlFormatter);
+            formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "{controller}/{action}/{userId}/{id}",

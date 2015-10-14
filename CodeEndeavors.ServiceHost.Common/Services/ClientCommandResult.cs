@@ -46,20 +46,20 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		public ClientCommandResult() : this(true)
 		{
 		}
-		public ClientCommandResult(bool StartTimer)
+		public ClientCommandResult(bool startTimer)
 		{
 			this._messages = new List<string>();
 			this._errors = new List<string>();
 			this._watch = new Stopwatch();
-			if (StartTimer)
+			if (startTimer)
 			{
 				this.StartTimer();
 			}
 		}
-		public void ReportResult(T Data, bool Success)
+		public void ReportResult(T data, bool success)
 		{
-			this.Success = Success;
-			this.Data = Data;
+			this.Success = success;
+			this.Data = data;
 			this.StopTimer();
 			bool isDebugEnabled = Log.IsDebugEnabled;
 			if (isDebugEnabled)
@@ -67,44 +67,35 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 				Log.Debug(this.ToString(), this.LoggerKey);
 			}
 		}
-		public void ReportResult(ServiceResult<T> Result, bool Success)
+		public void ReportResult(ServiceResult<T> result, bool success)
 		{
-			this.Success = Result.Success;
-			this.Data = Result.Data;
-			this.ServerExecutionTime = checked(new TimeSpan(0, 0, 0, (int)Math.Round(Result.ExecutionTime / 1000.0), (int)Math.Round(Result.ExecutionTime % 1000.0)));
-			this.Errors.AddRange(Result.Errors);
+			this.Success = result.Success;
+			this.Data = result.Data;
+			this.ServerExecutionTime = new TimeSpan(0, 0, 0, (int)Math.Round(result.ExecutionTime / 1000.0), (int)Math.Round(result.ExecutionTime % 1000.0));
+			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			bool isDebugEnabled = Log.IsDebugEnabled;
-			if (isDebugEnabled)
-			{
+			if (Log.IsDebugEnabled)
                 Log.Debug(this.ToString(), this.LoggerKey);
-			}
 		}
-		public void ReportResult(ClientCommandResult<T> Result, bool Success)
+		public void ReportResult(ClientCommandResult<T> result, bool success)
 		{
-			this.Success = Result.Success;
-			this.Data = Result.Data;
-			this.ServerExecutionTime = Result.ServerExecutionTime;
-			this.Errors.AddRange(Result.Errors);
+			this.Success = result.Success;
+			this.Data = result.Data;
+			this.ServerExecutionTime = result.ServerExecutionTime;
+			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			bool isDebugEnabled = Log.IsDebugEnabled;
-			if (isDebugEnabled)
-			{
+			if (Log.IsDebugEnabled)
                 Log.Debug(this.ToString(), this.LoggerKey);
-			}
 		}
-		public void ReportResult<T2>(ClientCommandResult<T2> Result, T Data, bool Success)
+		public void ReportResult<T2>(ClientCommandResult<T2> result, T data, bool success)
 		{
-			this.Success = Result.Success;
-			this.Data = Data;
-			this.ServerExecutionTime = Result.ServerExecutionTime;
-			this.Errors.AddRange(Result.Errors);
+			this.Success = result.Success;
+			this.Data = data;
+			this.ServerExecutionTime = result.ServerExecutionTime;
+			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			bool isDebugEnabled = Log.IsDebugEnabled;
-			if (isDebugEnabled)
-			{
+			if (Log.IsDebugEnabled)
                 Log.Debug(this.ToString(), this.LoggerKey);
-			}
 		}
 		public void AddException(Exception ex)
 		{

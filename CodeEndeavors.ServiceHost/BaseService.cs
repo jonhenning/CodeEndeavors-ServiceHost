@@ -68,7 +68,7 @@ namespace CodeEndeavors.ServiceHost
             {
                 HttpLogger.HttpLogConfigFileName = logConfigFileName;
             }
-            GlobalHttpModule.Application_Error += new GlobalHttpModule.ApplicationErrorHandler(this.Application_Error);
+            //Startup.Application_Error += new Startup.ApplicationErrorHandler(this.Application_Error);
         }
 
         protected ServiceResult<T> ExecuteServiceResult<T>(Helpers.ServiceResultHandler<T> codeFunc) where T : new()

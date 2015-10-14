@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,6 +83,34 @@ namespace CodeEndeavors.ServiceHost.Common
             }
             return sb.ToString();
         }
+        public static string GetLogRequest(HttpClient request, string body)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Format("REQUEST: {0} [{1}]", request.BaseAddress, string.IsNullOrEmpty(body) ? "GET" : "POST"));
+            sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", request.DefaultRequestHeaders.Accept, request.Timeout));
+            bool flag = body != null;
+            if (flag)
+            {
+                bool flag2 = body.ToLower().IndexOf("password") == -1;
+                if (flag2)
+                {
+                    bool flag3 = body.Length > 255;
+                    if (flag3)
+                    {
+                        sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, 255)));
+                    }
+                    else
+                    {
+                        sb.AppendLine(string.Format("Body: {0} ", body));
+                    }
+                }
+                else
+                {
+                    sb.AppendLine(string.Format("Body: {0} ", "[NOT LOGGING PASSWORDS]"));
+                }
+            }
+            return sb.ToString();
+        }
         public static string GetLogResponse(string Url, Exception ex)
         {
             StringBuilder sb = new StringBuilder();
@@ -89,27 +118,43 @@ namespace CodeEndeavors.ServiceHost.Common
             sb.AppendLine(string.Format("RESPONSE EXCEPTION: {0}", ex.Message));
             return sb.ToString();
         }
-        public static string GetLogResponse(WebResponse Response, string Body, int NumChars)
+
+        public static string GetLogResponse(HttpResponseMessage response, string body, int numChars)
         {
-            HttpWebResponse oHttpResponse = (HttpWebResponse)Response;
-            StringBuilder sb = new StringBuilder();
-            bool flag = Response != null;
-            if (flag)
+            var sb = new StringBuilder();
+            if (response != null)
             {
-                sb.AppendLine(string.Format("RESPONSE: {0} [{1} - {2}]", oHttpResponse.ResponseUri, (int)oHttpResponse.StatusCode, oHttpResponse.StatusDescription));
-                sb.AppendLine(string.Format("ContentType: {0}", oHttpResponse.ContentType));
-                flag = (Body.Length > NumChars);
-                if (flag)
-                {
-                    sb.AppendLine(string.Format("Body: {0}.......", Body.Substring(0, NumChars)));
-                }
+                sb.AppendLine(string.Format("RESPONSE: {0} [{1}]", response.RequestMessage, response.StatusCode));
+                //sb.AppendLine(string.Format("ContentType: {0}", oHttpResponse.ContentType));
+                if (body.Length > numChars)
+                    sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, numChars)));
                 else
-                {
-                    sb.AppendLine(string.Format("Body: {0} ", Body));
-                }
+                    sb.AppendLine(string.Format("Body: {0} ", body));
             }
             return sb.ToString();
         }
+
+        //public static string GetLogResponse(WebResponse Response, string Body, int NumChars)
+        //{
+        //    HttpWebResponse oHttpResponse = (HttpWebResponse)Response;
+        //    StringBuilder sb = new StringBuilder();
+        //    bool flag = Response != null;
+        //    if (flag)
+        //    {
+        //        sb.AppendLine(string.Format("RESPONSE: {0} [{1} - {2}]", oHttpResponse.ResponseUri, (int)oHttpResponse.StatusCode, oHttpResponse.StatusDescription));
+        //        sb.AppendLine(string.Format("ContentType: {0}", oHttpResponse.ContentType));
+        //        flag = (Body.Length > NumChars);
+        //        if (flag)
+        //        {
+        //            sb.AppendLine(string.Format("Body: {0}.......", Body.Substring(0, NumChars)));
+        //        }
+        //        else
+        //        {
+        //            sb.AppendLine(string.Format("Body: {0} ", Body));
+        //        }
+        //    }
+        //    return sb.ToString();
+        //}
         private static void ConfigureLogging()
         {
             HttpLogger._logger = null;

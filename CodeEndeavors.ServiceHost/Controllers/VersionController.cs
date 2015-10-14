@@ -1,42 +1,45 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 namespace CodeEndeavors.ServiceHost
 {
-    public class VersionController : Controller
+    public class VersionController : ApiController
     {
-        [System.Diagnostics.DebuggerNonUserCode]
         public VersionController()
         {
         }
-        public ActionResult Get()
+        public HttpResponseMessage Get()
         {
-            System.Web.HttpContext.Current.Response.Write("Welcome to the Code Endeavors Service ServiceHost!<br/>");
-            System.Web.HttpContext.Current.Response.Write(VersionController.GetServerName());
-            System.Web.HttpContext.Current.Response.Write("<table border='1'>");
-            System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-            checked
+            var sb = new StringBuilder();
+            sb.AppendLine("Welcome to the Code Endeavors Service ServiceHost!<br/>");
+            sb.AppendLine(getServerName());
+            sb.AppendLine("<table border='1'>");
+            var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (var assembly in assemblies)
+                sb.AppendLine(string.Format("<tr><td>{0}</td><td>{1}</td></tr>", assembly.GetName().Name, getVersion(assembly)));
+            sb.AppendLine("</table>");
+
+            return new HttpResponseMessage
             {
-                for (int i = 0; i < assemblies.Length; i++)
-                {
-                    System.Reflection.Assembly assembly = assemblies[i];
-                    System.Web.HttpContext.Current.Response.Write(string.Format("<tr><td>{0}</td><td>{1}</td></tr>", assembly.GetName().Name, VersionController.GetVersion(assembly)));
-                }
-                System.Web.HttpContext.Current.Response.Write("</table>");
-                return null;
-            }
+                Content = new StringContent(sb.ToString(), Encoding.UTF8, "text/html")
+            };
         }
-        public static string GetServerName()
+
+        private static string getServerName()
         {
-            string machineName = "UNKNOWN";
+            var machineName = "UNKNOWN";
             if (System.Web.HttpContext.Current != null)
                 machineName = System.Web.HttpContext.Current.Server.MachineName;
             return machineName;
         }
 
-        public static string GetVersion(System.Reflection.Assembly assembly)
+        private static string getVersion(System.Reflection.Assembly assembly)
         {
             try
             {

@@ -10,6 +10,7 @@ using System.Net;
 using CodeEndeavors.ServiceHost.Common;
 using CodeEndeavors.ServiceHost.Extensions;
 using System.Runtime.CompilerServices;
+using System.Net.Http;
 
 
 namespace CodeEndeavors.ServiceHost.Extensions
@@ -18,7 +19,6 @@ namespace CodeEndeavors.ServiceHost.Extensions
     {
         public static T DeserializeJSON<T>(HttpRequest request)
         {
-
             return HttpExtensions.GetText(request).ToObject<T>();
         }
         public static T DeserializeCompressedJSON<T>(HttpRequest request, ref ZipPayload zip)
@@ -26,40 +26,58 @@ namespace CodeEndeavors.ServiceHost.Extensions
             zip = ConversionExtensions.ToDecompress(request.InputStream);
             return ConversionExtensions.ToString(zip.Bytes).ToObject<T>();
         }
-        public static string GetText(WebResponse response)
+
+        public static string GetText(HttpResponseMessage response)
         {
-            string str = "";
-            bool flag = response == null;
-            string GetText;
-            if (flag)
-            {
-                GetText = str;
-            }
-            else
-            {
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                try
-                {
-                    GetText = reader.ReadToEnd();
-                }
-                finally
-                {
-                    flag = (reader != null);
-                    if (flag)
-                    {
-                        ((IDisposable)reader).Dispose();
-                    }
-                }
-            }
-            return GetText;
-        }
-        public static string GetTextDecompressed(WebResponse response, ref ZipPayload zip)
-        {
-            zip = ConversionExtensions.ToDecompress(response.GetResponseStream());
-            return ConversionExtensions.ToString(zip.Bytes);
+            return response.Content.ReadAsStringAsync().Result;
         }
 
-        public static string GetTextDecompressedBase64(WebResponse response, ref ZipPayload zip)
+        //public static string GetText(WebResponse response)
+        //{
+        //    string str = "";
+        //    bool flag = response == null;
+        //    string GetText;
+        //    if (flag)
+        //    {
+        //        GetText = str;
+        //    }
+        //    else
+        //    {
+        //        StreamReader reader = new StreamReader(response.GetResponseStream());
+        //        try
+        //        {
+        //            GetText = reader.ReadToEnd();
+        //        }
+        //        finally
+        //        {
+        //            flag = (reader != null);
+        //            if (flag)
+        //            {
+        //                ((IDisposable)reader).Dispose();
+        //            }
+        //        }
+        //    }
+        //    return GetText;
+        //}
+        //public static string GetTextDecompressed(WebResponse response, ref ZipPayload zip)
+        //{
+        //    zip = ConversionExtensions.ToDecompress(response.GetResponseStream());
+        //    return ConversionExtensions.ToString(zip.Bytes);
+        //}
+
+        //public static string GetTextDecompressedBase64(WebResponse response, ref ZipPayload zip)
+        //{
+        //    var text = GetText(response);
+
+        //    //text is prefixed and suffixed with a quote... remove
+        //    text = text.TrimStart('"').TrimEnd('"');
+
+        //    var bytes = Convert.FromBase64String(text);
+        //    zip = ConversionExtensions.ToDecompress(bytes);
+        //    return ConversionExtensions.ToString(zip.Bytes);
+        //}
+
+        public static string GetTextDecompressedBase64(HttpResponseMessage response, ref ZipPayload zip)
         {
             var text = GetText(response);
 

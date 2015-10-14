@@ -3,22 +3,40 @@ using CodeEndeavors.ServiceHost.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Runtime.CompilerServices;
+using System.Net.Http;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace CodeEndeavors.ServiceHost.Common.Services
 {
+    public enum AuthenticationType
+    {
+        None,
+        BasicAuthentication,
+        Custom
+    }
+
 	public class BaseClientHttpService
 	{
 		public delegate string AquireUserId();
-		public int HttprequestTimeout;
-		public string httpServiceUrl;
-		public string restfulServerExtension;
-		public string httpUser;
-		public string httpPassword;
-		private string _controllerName;
+        public delegate void ProcessAuthenticationHandler(HttpClient request, string user, string password);
+		public int HttpRequestTimeout;
+		public string HttpServiceUrl;
+		public string RestfulServerExtension;
+        public AuthenticationType AuthenticationType;
+        public string HttpUser;
+		public string HttpPassword;
+        public HttpClientHandler HttpClientHandler;
+		
+        private string _controllerName;
 		private CookieContainer _cookieJar;
+
+        private BaseClientHttpService.ProcessAuthenticationHandler _processAuthenticationHandler;
+        public BaseClientHttpService.ProcessAuthenticationHandler ProcessAuthentication
+        {
+            get  { return _processAuthenticationHandler; }
+            set  { _processAuthenticationHandler = value; }
+        }
 		private BaseClientHttpService.AquireUserId _aquireUserIdDelegate;
 		public BaseClientHttpService.AquireUserId AquireUserIdDelegate
 		{
@@ -39,65 +57,48 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		}
 		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName, string httpUser, string httpPassword)
 		{
-			this.httpUser = "";
-			this.httpPassword = "";
+			this.HttpUser = "";
+			this.HttpPassword = "";
 			this._controllerName = controllerName;
-			this.httpServiceUrl = httpServiceUrl;
-			this.restfulServerExtension = restfulServerExtension;
-			this.HttprequestTimeout = requestTimeout;
-			this.httpUser = httpUser;
-			this.httpPassword = httpPassword;
-			bool flag = !string.IsNullOrEmpty(logConfigFileName);
-			if (flag)
+			this.HttpServiceUrl = httpServiceUrl;
+			this.RestfulServerExtension = restfulServerExtension;
+			this.HttpRequestTimeout = requestTimeout;
+			this.HttpUser = httpUser;
+			this.HttpPassword = httpPassword;
+			if (!string.IsNullOrEmpty(logConfigFileName))
 			{
 				HttpLogger.HttpLogConfigFileName = logConfigFileName;
 			}
-			this.AquireUserIdDelegate = new BaseClientHttpService.AquireUserId(this._AquireUserId);
+			this.AquireUserIdDelegate = new BaseClientHttpService.AquireUserId(Handlers.AquireUserId);
 		}
-		private string _AquireUserId()
-		{
-			var userId = "";
-            if (Thread.CurrentPrincipal != null && !string.IsNullOrEmpty(Thread.CurrentPrincipal.Identity.Name))
-                userId = Thread.CurrentPrincipal.Identity.Name;
-			return userId;
-		}
+
 		public T GetHttpRequestObject<T>(string Url, bool compressedRequest, bool compressedResponse)
 		{
 			return this.GetHttpRequestObject<T>(Url, null, compressedRequest, compressedResponse);
 		}
-        //public T GetHttpRequestObject<T>(string Url, object[] Body, bool compressedRequest, bool compressedResponse)
-        //{
-        //    List<string> oBodyList = new List<string>();
-        //    bool flag = Body != null;
-        //    checked
-        //    {
-        //        if (flag)
-        //        {
-        //            for (int i = 0; i < Body.Length; i++)
-        //            {
-        //                object oItem = RuntimeHelpers.GetObjectValue(Body[i]);
-        //                oBodyList.Add(RuntimeHelpers.GetObjectValue(oItem).ToJson(false, null, true));
-        //            }
-        //        }
-        //        return this.GetHttpRequestObject<T>(Url, oBodyList.Count == 0 ? null : oBodyList, compressedRequest, compressedResponse);
-        //    }
-        //}
 
 		public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
 		{
-            string sJsonRequest = body != null ? RuntimeHelpers.GetObjectValue(body).ToJson(false, null, true) : null;
-			bool flag = compressedRequest && !string.IsNullOrEmpty(sJsonRequest);
+            var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
 			string jsonResponse;
-			if (flag)
+			if (compressedRequest && !string.IsNullOrEmpty(jsonRequest))
 			{
-				ZipPayload oZip = ConversionExtensions.ToCompress(sJsonRequest);
+				ZipPayload oZip = ConversionExtensions.ToCompress(jsonRequest);
 				HttpLogger.Logger.Info(oZip.GetStatistics());
-				jsonResponse = this.GetResponse(url, oZip.Bytes, this.HttprequestTimeout, string.Empty, compressedRequest, compressedResponse, false);
+				jsonResponse = this.GetResponse(url, oZip.Bytes, this.HttpRequestTimeout, string.Empty, compressedRequest, compressedResponse, false);
 			}
 			else
 			{
-				jsonResponse = this.GetResponse(url, sJsonRequest, this.HttprequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
+				jsonResponse = this.GetResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
 			}
+
+            if (jsonResponse.StartsWith("{\"Message\":\""))
+            {
+                var errorDict = jsonResponse.ToObject<Dictionary<string, object>>();
+                throw new Exception(errorDict["Message"].ToString());
+            }
+
+
 			return jsonResponse.ToObject<T>();
 		}
 		public string RequestUrl(string method)
@@ -112,7 +113,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		{
 			var userId = this.AquireUserIdDelegate();
 
-            return this.httpServiceUrl.PathCombine(this._controllerName + this.restfulServerExtension, "/")
+            return this.HttpServiceUrl.PathCombine(this._controllerName + this.RestfulServerExtension, "/")
                 .PathCombine(method, "/")
                 .PathCombine(userId, "/")
                 .PathCombine(suffix, "/");
@@ -129,7 +130,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		}
 		private string ResolveController(string controllerName)
 		{
-			return controllerName + this.restfulServerExtension;
+			return controllerName + this.RestfulServerExtension;
 		}
 		private string GetResponse(string url, int timeOut, bool compressedRequest, bool compressedResponse)
 		{
@@ -149,29 +150,40 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			string GetResponse;
 			try
 			{
-				CookieContainer jar = this.HandleAuth();
-				WebRequest request = WebRequest.Create(url);
-				((HttpWebRequest)request).CookieContainer = jar;
+                HttpClient request = null;
+                if (HttpClientHandler == null)
+                    request = new HttpClient() { BaseAddress = new Uri(url) };
+                else
+                    request = new HttpClient(HttpClientHandler) { BaseAddress = new Uri(url) };
+
+                if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
+                    this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
+
+                if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
+                    this.ProcessAuthentication(request, HttpUser, HttpPassword);
+
                 if (timeOut > 0)
-                    request.Timeout = timeOut;
+                    request.Timeout = new TimeSpan(0, 0, 0, 0, timeOut);
 
-                if (!string.IsNullOrEmpty(contentType))
-					request.ContentType = contentType;
 
-				if (body == null)
-					request.Method = "GET";
-				else
-				{
-					request.Method = "POST";
-					CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(request, body);
-				}
+                Task<HttpResponseMessage> responseTask = null;
+                if (body == null)
+                    responseTask = request.GetAsync("");
+                else
+                {
+                    var byteContent = new ByteArrayContent(body);
+                    if (!string.IsNullOrEmpty(contentType))
+                        byteContent.Headers.Add("Content-Type", contentType);
+                    responseTask = request.PostAsync("", byteContent);
+                }
 				
                 HttpLogger.Logger.InfoFormat("GetHttp Request: {0}", url);
 
                 if (compressedRequest == false && HttpLogger.Logger.IsDebugEnabled)
 					HttpLogger.Logger.Debug(HttpLogger.GetLogRequest(request, (body == null) ? "" : ConversionExtensions.ToString(body)));
 
-				var response = (HttpWebResponse)request.GetResponse();
+                var response = responseTask.Result;
+                
 				if (compressedResponse)
 				{
 					ZipPayload zip = null;
@@ -186,57 +198,56 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 					HttpLogger.Logger.Debug(HttpLogger.GetLogResponse(response, responseText, 255));
 
 			}
-			catch (WebException ex)
-			{
-				HttpLogger.Logger.Error("FAIL: " + ex.Message);
-				bool flag = ex.Response != null;
-                if (ex.Response != null)
-                {
-                    throw new Exception(HttpLogger.GetLogResponse(url, ex));
-                    if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.Forbidden && !triedAuthAlready)
-                    {
-                        this._cookieJar = null;
-                        return this.GetResponse(url, body, timeOut, contentType, compressedRequest, compressedResponse, true);
-                    }
-                }
-				throw new Exception(HttpLogger.GetLogResponse(ex.Response, CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(ex.Response), 1000));
-			}
+            //catch (WebException ex)
+            //{
+            //    HttpLogger.Logger.Error("FAIL: " + ex.Message);
+            //    bool flag = ex.Response != null;
+            //    if (ex.Response != null)
+            //    {
+            //        throw new Exception(HttpLogger.GetLogResponse(url, ex));
+            //        if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.Forbidden && !triedAuthAlready)
+            //        {
+            //            this._cookieJar = null;
+            //            return this.GetResponse(url, body, timeOut, contentType, compressedRequest, compressedResponse, true);
+            //        }
+            //    }
+            //    throw new Exception(HttpLogger.GetLogResponse(ex.Response, CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(ex.Response), 1000));
+            //}
 			catch (Exception ex)
 			{
 				HttpLogger.Logger.Error("FAIL: " + ex.Message);
 				throw new Exception(HttpLogger.GetLogResponse(url, ex));
 			}
-			GetResponse = responseText;
-			return GetResponse;
+			return responseText;
 		}
-		private CookieContainer HandleAuth()
-		{
-			try
-			{
-                if (!string.IsNullOrEmpty(this.httpUser))
-				{
-                    var url = this.httpServiceUrl.PathCombine("ServiceHostAuth" + this.restfulServerExtension, "/").PathCombine("Authenticate", "/");
+        //private CookieContainer HandleAuth()
+        //{
+        //    try
+        //    {
+        //        if (!string.IsNullOrEmpty(this.HttpUser))
+        //        {
+        //            var url = this.HttpServiceUrl.PathCombine("ServiceHostAuth" + this.RestfulServerExtension, "/").PathCombine("Authenticate", "/");
 
-                    if (this._cookieJar == null)
-					{
-						var formFields = new Dictionary<string, string>();
-						formFields["user"] = this.httpUser;
-						formFields["password"] = this.httpPassword;
-						var req = (HttpWebRequest)WebRequest.Create(url);
-						req.Method = "POST";
-						this._cookieJar = new CookieContainer();
-						req.CookieContainer = this._cookieJar;
-                        CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(req, ConversionExtensions.ToCompress(formFields.ToJson(false, null, true)).Bytes);
-						var res = (HttpWebResponse)req.GetResponse();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				HttpLogger.Logger.Error("FAIL: " + ex.Message);
-			}
-			return this._cookieJar;
-		}
+        //            if (this._cookieJar == null)
+        //            {
+        //                var formFields = new Dictionary<string, string>();
+        //                formFields["user"] = this.HttpUser;
+        //                formFields["password"] = this.HttpPassword;
+        //                var req = (HttpWebRequest)WebRequest.Create(url);
+        //                req.Method = "POST";
+        //                this._cookieJar = new CookieContainer();
+        //                req.CookieContainer = this._cookieJar;
+        //                CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(req, ConversionExtensions.ToCompress(formFields.ToJson(false, null, true)).Bytes);
+        //                var res = (HttpWebResponse)req.GetResponse();
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        HttpLogger.Logger.Error("FAIL: " + ex.Message);
+        //    }
+        //    return this._cookieJar;
+        //}
 	}
 }
 
