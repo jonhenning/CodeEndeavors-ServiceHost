@@ -95,7 +95,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             if (jsonResponse.StartsWith("{\"Message\":\""))
             {
                 var errorDict = jsonResponse.ToObject<Dictionary<string, object>>();
-                throw new Exception(errorDict["Message"].ToString());
+                throw new Exception(errorDict.ToJson());
             }
 
 
