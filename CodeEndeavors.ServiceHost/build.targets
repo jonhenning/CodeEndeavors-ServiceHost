@@ -9,7 +9,7 @@
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
-        <DeployDir>$(RootDir)\..\ServiceHost</DeployDir>
+        <DeployDir></DeployDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
 
