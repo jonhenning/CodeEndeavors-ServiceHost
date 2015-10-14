@@ -9,10 +9,15 @@
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
+        <DeployDir></DeployDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
 
-    <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
+    <ItemGroup>
+      <DeployDirs Include="$(DeployDir)" />
+    </ItemGroup>
+
+  <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
 
     <Target Name="AfterBuild">
         <CallTarget Targets="CreateSetupPackage" />
@@ -33,9 +38,9 @@
         <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
     </Target>
     <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
-        <MakeDir Directories="$(DeployDir)\bin" />
-        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
-        <Copy SourceFiles="$(TargetDir)\CodeEndeavors.ServiceHost.Common.dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
+      <Copy SourceFiles="$(TargetDir)\CodeEndeavors.Extensions.dll" DestinationFolder="%(DeployDirs.FullPath)\bin"  />
+      <Copy SourceFiles="$(TargetDir)\CodeEndeavors.ServiceHost.dll" DestinationFolder="%(DeployDirs.FullPath)\bin" />
+      <Copy SourceFiles="$(TargetDir)\CodeEndeavors.ServiceHost.Common.dll" DestinationFolder="%(DeployDirs.FullPath)\bin" />
     </Target>
 
 </Project>
