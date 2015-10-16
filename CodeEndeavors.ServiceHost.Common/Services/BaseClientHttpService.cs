@@ -13,19 +13,21 @@ namespace CodeEndeavors.ServiceHost.Common.Services
     {
         None,
         BasicAuthentication,
+        OAuth2,
         Custom
     }
 
 	public class BaseClientHttpService
 	{
 		public delegate string AquireUserId();
-        public delegate void ProcessAuthenticationHandler(HttpClient request, string user, string password);
+        public delegate void ProcessAuthenticationHandler(HttpClient request, string user, string password, ref string token);
 		public int HttpRequestTimeout;
 		public string HttpServiceUrl;
 		public string RestfulServerExtension;
         public AuthenticationType AuthenticationType;
         public string HttpUser;
 		public string HttpPassword;
+        private string _token;
         public HttpClientHandler HttpClientHandler;
 		
         private string _controllerName;
@@ -147,7 +149,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		private string GetResponse(string url, byte[] body, int timeOut, string contentType, bool compressedRequest, bool compressedResponse, bool triedAuthAlready)
 		{
 			string responseText = "";
-			string GetResponse;
 			try
 			{
                 HttpClient request = null;
@@ -158,9 +159,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
                 if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
                     this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
+                else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
+                    this.ProcessAuthentication = Handlers.ProcessOAuth;
 
                 if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
-                    this.ProcessAuthentication(request, HttpUser, HttpPassword);
+                    this.ProcessAuthentication(request, HttpUser, HttpPassword, ref _token);
 
                 if (timeOut > 0)
                     request.Timeout = new TimeSpan(0, 0, 0, 0, timeOut);

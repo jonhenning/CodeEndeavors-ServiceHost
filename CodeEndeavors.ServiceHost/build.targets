@@ -37,7 +37,9 @@
         <Zip Files="
              $(TargetDir)\CodeEndeavors.Extensions.dll;
              $(TargetDir)\$(ExternalClientName).dll;
+             $(TargetDir)\$(ExternalClientName).pdb;
              $(TargetDir)\CodeEndeavors.ServiceHost.Common.dll;
+             $(TargetDir)\CodeEndeavors.ServiceHost.Common.pdb;
              $(TargetDir)\Swashbuckle.Core.dll;
              $(TargetDir)\System.Web.Http.dll;
              $(TargetDir)\System.Web.Http.Owin.dll;
@@ -46,6 +48,7 @@
              $(TargetDir)\Microsoft.Owin.dll;
              $(TargetDir)\Microsoft.Owin.Host.SystemWeb.dll;
              $(TargetDir)\Microsoft.Owin.Security.Cookies.dll;
+             $(TargetDir)\Microsoft.Owin.Security.OAuth.dll;
              $(TargetDir)\Microsoft.Owin.Security.dll;
              $(TargetDir)\Owin.dll;
              $(TargetDir)\Newtonsoft.Json.dll;

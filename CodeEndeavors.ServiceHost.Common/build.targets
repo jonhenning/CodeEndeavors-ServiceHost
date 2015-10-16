@@ -3,10 +3,10 @@
     <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
     <PropertyGroup>
         <ProjectFullName>CodeEndeavors.ServiceHost.Common</ProjectFullName>
-        <InternalizedDlls>ICSharpCode.SharpZipLib.dll log4net.dll</InternalizedDlls>
+        <InternalizedDlls>ICSharpCode.SharpZipLib.dll log4net.dll Thinktecture.IdentityModel.Client.Net45.dll</InternalizedDlls>
         <ProgramFiles32 Condition="Exists('$(PROGRAMFILES) (x86)')">$(PROGRAMFILES) (x86)</ProgramFiles32>
         <ProgramFiles32 Condition="$(ProgramFiles32) == ''">$(PROGRAMFILES)</ProgramFiles32>
-        <ILMergeTargetPlatform>/targetplatform:v4,"$(PROGRAMFILES)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client"</ILMergeTargetPlatform>
+        <ILMergeTargetPlatform>/targetplatform:v4,"$(PROGRAMFILES)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"</ILMergeTargetPlatform>
       <DeployDir></DeployDir>
     </PropertyGroup>
     

@@ -6,6 +6,9 @@ using System.Configuration;
 using System.Web.Http;
 //using System.Web.Mvc;
 using Swashbuckle.Application;
+using Microsoft.Owin.Security.OAuth;
+using System;
+using CodeEndeavors.ServiceHost.Provider;
 
 [assembly: OwinStartup(typeof(CodeEndeavors.ServiceHost.App_Start.Startup))]
 
@@ -29,6 +32,20 @@ namespace CodeEndeavors.ServiceHost.App_Start
 
             if (ConfigurationManager.AppSettings.GetSetting("BasicAuth.Enabled", false))
                 app.UseBasicAuthentication("ServiceHost");
+
+            if (ConfigurationManager.AppSettings.GetSetting("OAuth.Enabled", false))
+            {
+                app.UseOAuthAuthorizationServer(new OAuthAuthorizationServerOptions()
+                    {
+                        AllowInsecureHttp = true,
+                        TokenEndpointPath = new PathString("/token"),
+                        AccessTokenExpireTimeSpan = TimeSpan.FromHours(8),
+                        Provider = new SimpleAuthorizationServerProvider(),
+                        RefreshTokenProvider = new SimpleRefreshTokenProvider()
+                    });
+
+                app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+            }
 
             app.UseWebApi(config);  //must be last
 
