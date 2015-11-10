@@ -19,7 +19,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
 	public class BaseClientHttpService
 	{
-		public delegate string AquireUserId();
+		//public delegate string AquireUserId();
         public delegate void ProcessAuthenticationHandler(HttpClient request, string user, string password, ref string token);
 		public int HttpRequestTimeout;
 		public string HttpServiceUrl;
@@ -39,8 +39,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             get  { return _processAuthenticationHandler; }
             set  { _processAuthenticationHandler = value; }
         }
-		private BaseClientHttpService.AquireUserId _aquireUserIdDelegate;
-		public BaseClientHttpService.AquireUserId AquireUserIdDelegate
+		private Func<string> _aquireUserIdDelegate;
+		public Func<string> AquireUserIdDelegate
 		{
 			get
 			{
@@ -71,7 +71,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			{
 				HttpLogger.HttpLogConfigFileName = logConfigFileName;
 			}
-			this.AquireUserIdDelegate = new BaseClientHttpService.AquireUserId(Handlers.AquireUserId);
+			this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
 		}
 
 		public T GetHttpRequestObject<T>(string Url, bool compressedRequest, bool compressedResponse)
