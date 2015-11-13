@@ -48,20 +48,20 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             : this(false)
         {
         }
-        public ServiceResult(bool StartTimer)
+        public ServiceResult(bool startTimer)
         {
             this._messages = new List<string>();
             this._errors = new List<string>();
             this._watch = new Stopwatch();
-            if (StartTimer)
+            if (startTimer)
             {
                 this.StartTimer();
             }
         }
-        public void ReportResult(T Data, bool Success)
+        public void ReportResult(T data, bool success)
         {
-            this.Success = true;
-            this.Data = Data;
+            this.Success = success;
+            this.Data = data;
             this.StopTimer();
             bool isDebugEnabled = Log.IsDebugEnabled;
             if (isDebugEnabled)
