@@ -10,6 +10,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
     {
         public delegate void ClientCommandResultHandler<T>(ClientCommandResult<T> result) where T : new();
         public delegate void ServiceResultHandler<T>(ServiceResult<T> result) where T : new();
+        public delegate ClientCommandResult<T> ExecuteClientHandler<T>() where T : new();
         public static ClientCommandResult<T> ExecuteClientResult<T>(ClientCommandResultHandler<T> codeFunc) where T : new()
         {
             var result = new ClientCommandResult<T>(true);
@@ -65,6 +66,14 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                 return System.Reflection.Assembly.LoadWithPartialName(name.Name);
 
             return null;
+        }
+
+        public static T ExecuteClient<T>(ExecuteClientHandler<T> codeFunc) where T: new()
+        {
+            var cr = codeFunc.Invoke();
+            if (cr.Success)
+                return cr.Data;
+            throw new Exception(cr.ToString());
         }
 
     }
