@@ -94,5 +94,14 @@ namespace CodeEndeavors.ServiceHost
 
             return defaultValue;
         }
+
+        public static string AquireUserId()     //not sure this is best place to put static method
+        {
+            var userId = "-1";
+            if (HttpContext.Current != null && HttpContext.Current.Items.Contains("ServiceHost.UserId"))
+                userId = HttpContext.Current.Items["ServiceHost.UserId"].ToString();
+            return userId;
+        }
+
     }
 }

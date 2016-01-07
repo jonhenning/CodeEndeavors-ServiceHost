@@ -140,6 +140,7 @@
     <Compile Include="Middleware\BasicAuthenticationMiddleware.cs" />
     <Compile Include="Middleware\BasicAuthenticationMiddlewareExtensions.cs" />
     <Compile Include="Middleware\BasicAuthenticationOptions.cs" />
+    <Compile Include="Middleware\UserContextHandler.cs" />
     <Compile Include="Models\ViewClaim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\SimpleAuthorizationServerProvider.cs" />
