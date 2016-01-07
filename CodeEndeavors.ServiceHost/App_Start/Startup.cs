@@ -26,6 +26,7 @@ namespace CodeEndeavors.ServiceHost.App_Start
 
             RouteConfig.RegisterRoutes(config);
 
+            app.Use(typeof(Middleware.LoggingMiddleware));
             config.MessageHandlers.Add(new Middleware.UserContextHandler());
 
             SwaggerConfig.Register(config);
