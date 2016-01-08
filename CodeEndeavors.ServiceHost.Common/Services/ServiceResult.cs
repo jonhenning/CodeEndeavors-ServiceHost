@@ -112,7 +112,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             }
             else
             {
-                var json = this.Data.ToJson();
+                var json = this.Data.ToJson(false, null, true);
                 if (json.Length > 255)
                     json = json.Substring(0, 255);
                 sb.AppendLine("Data: " + json);
