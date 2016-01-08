@@ -19,101 +19,83 @@ namespace CodeEndeavors.ServiceHost.Common
         {
             get
             {
-                return HttpLogger._logConfigFileName;
+                return _logConfigFileName;
             }
             set
             {
-                HttpLogger._logConfigFileName = value;
-                HttpLogger.ConfigureLogging();
+                if (_logConfigFileName != value)
+                {
+                    _logConfigFileName = value;
+                    ConfigureLogging();
+                }
             }
         }
         public static string HttpLoggerKey
         {
             get
             {
-                return HttpLogger._loggerKey;
+                return _loggerKey;
             }
             set
             {
-                HttpLogger._loggerKey = value;
-                HttpLogger.ConfigureLogging();
+                _loggerKey = value;
+                ConfigureLogging();
             }
         }
         public static ILog Logger
         {
             get
             {
-                bool flag = HttpLogger._logger == null;
-                if (flag)
-                {
-                    HttpLogger._logger = Log.GetLogger(HttpLogger.HttpLoggerKey);
-                }
-                return HttpLogger._logger;
+                if (_logger == null)
+                    _logger = Log.GetLogger(HttpLogger.HttpLoggerKey);
+                return _logger;
             }
         }
         [DebuggerNonUserCode]
         public HttpLogger()
         {
         }
-        public static string GetLogRequest(WebRequest Request, string Body)
+        public static string GetLogRequest(WebRequest request, string body)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Format("REQUEST: {0} [{1}]", Request.RequestUri, Request.Method));
-            sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", Request.ContentType, Request.Timeout));
-            bool flag = Body != null;
-            if (flag)
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("REQUEST: {0} [{1}]", request.RequestUri, request.Method));
+            sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", request.ContentType, request.Timeout));
+            if (body != null)
             {
-                bool flag2 = Body.ToLower().IndexOf("password") == -1;
-                if (flag2)
+                if (body.ToLower().IndexOf("password") == -1)
                 {
-                    bool flag3 = Body.Length > 255;
-                    if (flag3)
-                    {
-                        sb.AppendLine(string.Format("Body: {0}.......", Body.Substring(0, 255)));
-                    }
+                    if (body.Length > 255)
+                        sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, 255)));
                     else
-                    {
-                        sb.AppendLine(string.Format("Body: {0} ", Body));
-                    }
+                        sb.AppendLine(string.Format("Body: {0} ", body));
                 }
                 else
-                {
                     sb.AppendLine(string.Format("Body: {0} ", "[NOT LOGGING PASSWORDS]"));
-                }
             }
             return sb.ToString();
         }
         public static string GetLogRequest(HttpClient request, string body)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine(string.Format("REQUEST: {0} [{1}]", request.BaseAddress, string.IsNullOrEmpty(body) ? "GET" : "POST"));
             sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", request.DefaultRequestHeaders.Accept, request.Timeout));
-            bool flag = body != null;
-            if (flag)
+            if (body != null)
             {
-                bool flag2 = body.ToLower().IndexOf("password") == -1;
-                if (flag2)
+                if (body.ToLower().IndexOf("password") == -1)
                 {
-                    bool flag3 = body.Length > 255;
-                    if (flag3)
-                    {
+                    if (body.Length > 255)
                         sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, 255)));
-                    }
                     else
-                    {
                         sb.AppendLine(string.Format("Body: {0} ", body));
-                    }
                 }
                 else
-                {
                     sb.AppendLine(string.Format("Body: {0} ", "[NOT LOGGING PASSWORDS]"));
-                }
             }
             return sb.ToString();
         }
         public static string GetLogResponse(string Url, Exception ex)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine(string.Format("RESPONSE: {0}", Url));
             sb.AppendLine(string.Format("RESPONSE EXCEPTION: {0}", ex.Message));
             return sb.ToString();
@@ -157,7 +139,7 @@ namespace CodeEndeavors.ServiceHost.Common
         //}
         private static void ConfigureLogging()
         {
-            HttpLogger._logger = null;
+            _logger = null;
             Log.Configure(HttpLogger.HttpLogConfigFileName, HttpLogger.HttpLoggerKey);
         }
     }

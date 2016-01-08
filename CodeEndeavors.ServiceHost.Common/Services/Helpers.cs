@@ -13,7 +13,12 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public delegate ClientCommandResult<T> ExecuteClientHandler<T>() where T : new();
         public static ClientCommandResult<T> ExecuteClientResult<T>(ClientCommandResultHandler<T> codeFunc) where T : new()
         {
+            return ExecuteClientResult<T>(HttpLogger.HttpLoggerKey, codeFunc);
+        }
+        public static ClientCommandResult<T> ExecuteClientResult<T>(string loggerKey, ClientCommandResultHandler<T> codeFunc) where T : new()
+        {
             var result = new ClientCommandResult<T>(true);
+            result.LoggerKey = loggerKey;
             try
             {
                 codeFunc.Invoke(result);
