@@ -1,4 +1,6 @@
-﻿using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
+﻿using System.Linq;
+using CodeEndeavors.Extensions;
+using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -88,14 +90,32 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         }
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Format("Success: {0}   Time: {1}", this.Success, this.ExecutionTime / 1000.0));
+            var sb = new StringBuilder();
+
+            var methodName = "Unknown";
+            var frames = new System.Diagnostics.StackTrace().GetFrames();
+            var executeResultFrame = frames.Where(f => f.GetMethod().Name == "ExecuteServiceResult").LastOrDefault();
+            if (executeResultFrame != null)
+            {
+                var nextIndex = Array.IndexOf(frames, executeResultFrame) + 1;
+                if (frames.Length > nextIndex)
+                    methodName = frames[Array.IndexOf(frames, executeResultFrame) + 1].GetMethod().Name;
+            }
+
+            sb.AppendLine(string.Format("{0}   [Success: {1} Time: {2}]", methodName, this.Success, this.ExecutionTime / 1000.0));
 
             if (this.Errors.Count > 0)
             {
                 List<string>.Enumerator enumerator = this.Errors.GetEnumerator();
                 foreach (var error in this.Errors)
                     sb.AppendLine(string.Format("ERROR: {0}", error));
+            }
+            else
+            {
+                var json = this.Data.ToJson();
+                if (json.Length > 255)
+                    json = json.Substring(0, 255);
+                sb.AppendLine("Data: " + json);
             }
             return sb.ToString();
         }

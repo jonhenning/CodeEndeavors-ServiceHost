@@ -93,10 +93,10 @@ namespace CodeEndeavors.ServiceHost.Common
             }
             return sb.ToString();
         }
-        public static string GetLogResponse(string Url, Exception ex)
+        public static string GetLogResponse(string url, Exception ex)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(string.Format("RESPONSE: {0}", Url));
+            sb.AppendLine(string.Format("RESPONSE: {0}", url));
             sb.AppendLine(string.Format("RESPONSE EXCEPTION: {0}", ex.Message));
             return sb.ToString();
         }
