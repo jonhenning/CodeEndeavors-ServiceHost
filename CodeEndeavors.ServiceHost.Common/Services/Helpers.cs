@@ -9,7 +9,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
     public class Helpers
     {
         public delegate void ClientCommandResultHandler<T>(ClientCommandResult<T> result) where T : new();
-        public delegate void ServiceResultHandler<T>(ServiceResult<T> result) where T : new();
+        public delegate void ServiceResultHandler<T>(ServiceResult<T> result); //where T : new();
         public delegate ClientCommandResult<T> ExecuteClientHandler<T>() where T : new();
         public static ClientCommandResult<T> ExecuteClientResult<T>(ClientCommandResultHandler<T> codeFunc) where T : new()
         {
@@ -34,12 +34,12 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             return result;
         }
 
-        public static ServiceResult<T> ExecuteServiceResult<T>(ServiceResultHandler<T> codeFunc) where T : new()
+        public static ServiceResult<T> ExecuteServiceResult<T>(ServiceResultHandler<T> codeFunc) //where T : new()
         {
             return ExecuteServiceResult<T>(null, codeFunc);
         }
 
-        public static ServiceResult<T> ExecuteServiceResult<T>(string loggerKey, ServiceResultHandler<T> codeFunc) where T : new()
+        public static ServiceResult<T> ExecuteServiceResult<T>(string loggerKey, ServiceResultHandler<T> codeFunc) //where T : new()
         {
             var result = new ServiceResult<T>(true);
             result.LoggerKey = loggerKey;

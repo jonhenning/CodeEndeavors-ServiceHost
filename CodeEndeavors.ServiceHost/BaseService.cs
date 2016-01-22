@@ -71,7 +71,7 @@ namespace CodeEndeavors.ServiceHost
             //Startup.Application_Error += new Startup.ApplicationErrorHandler(this.Application_Error);
         }
 
-        protected ServiceResult<T> ExecuteServiceResult<T>(Helpers.ServiceResultHandler<T> codeFunc) where T : new()
+        protected ServiceResult<T> ExecuteServiceResult<T>(Helpers.ServiceResultHandler<T> codeFunc) //where T : new()
         {
             return Helpers.ExecuteServiceResult<T>(_serviceLogKey, codeFunc);
         }
