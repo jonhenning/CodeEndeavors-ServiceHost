@@ -9,6 +9,8 @@ using Swashbuckle.Application;
 using Microsoft.Owin.Security.OAuth;
 using System;
 using CodeEndeavors.ServiceHost.Provider;
+using Microsoft.AspNet.WebApi.Extensions.Compression.Server;
+using System.Net.Http.Extensions.Compression.Core.Compressors;
 
 [assembly: OwinStartup(typeof(CodeEndeavors.ServiceHost.App_Start.Startup))]
 
@@ -28,6 +30,11 @@ namespace CodeEndeavors.ServiceHost.App_Start
 
             app.Use(typeof(Middleware.LoggingMiddleware));
             config.MessageHandlers.Add(new Middleware.UserContextHandler());
+            if (ConfigurationManager.AppSettings.GetSetting("Compression.Enabled", true))
+            {
+                config.MessageHandlers.Add(new ServerCompressionHandler(new GZipCompressor(), new DeflateCompressor()));
+                //config.MessageHandlers.Add(new OwinServerCompressionHandler());
+            }
 
             SwaggerConfig.Register(config);
             WebApiConfig.Register(config);

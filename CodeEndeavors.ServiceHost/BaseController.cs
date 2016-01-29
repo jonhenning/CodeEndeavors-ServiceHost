@@ -16,6 +16,7 @@ namespace CodeEndeavors.ServiceHost
     public class BaseController : ApiController
     {
         // Methods
+        [Obsolete("Compression now done with gzip via headers and middleware")]
         protected T DeserializeCompressedRequest<T>()
         {
             if (System.Web.HttpContext.Current != null)
@@ -45,11 +46,16 @@ namespace CodeEndeavors.ServiceHost
             return ServiceLocator.Resolve<T>();
         }
 
-        protected void WriteJSON(object Data)
+        protected void WriteJSON(object data)
         {
-            this.WriteJSON(RuntimeHelpers.GetObjectValue(Data), false);
+            if (System.Web.HttpContext.Current != null)
+            {
+                System.Web.HttpContext.Current.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(data));
+            }
         }
 
+        [Obsolete("Compression now done with gzip via headers and middleware")]
         protected void WriteJSON(object data, bool compressed)
         {
             if (System.Web.HttpContext.Current != null)
@@ -68,6 +74,7 @@ namespace CodeEndeavors.ServiceHost
             }
         }
 
+        [Obsolete("Compression now done with gzip via headers and middleware")]
         protected byte[] GetCompressed(object data)
         {
             var json = RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true);

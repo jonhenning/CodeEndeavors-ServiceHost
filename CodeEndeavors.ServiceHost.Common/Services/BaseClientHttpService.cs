@@ -54,10 +54,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, null)
 		{
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, logConfigFileName, "", "")
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, logConfigFileName, "", "", AuthenticationType.None)
 		{
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName, string httpUser, string httpPassword)
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName, string httpUser, string httpPassword, AuthenticationType authenticationType)
 		{
 			this.HttpUser = "";
 			this.HttpPassword = "";
@@ -67,19 +67,41 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.HttpRequestTimeout = requestTimeout;
 			this.HttpUser = httpUser;
 			this.HttpPassword = httpPassword;
-			if (!string.IsNullOrEmpty(logConfigFileName))
+            this.AuthenticationType = authenticationType;
+
+            if (!string.IsNullOrEmpty(logConfigFileName))
 			{
 				HttpLogger.HttpLogConfigFileName = logConfigFileName;
 			}
 			this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
 		}
 
-		public T GetHttpRequestObject<T>(string Url, bool compressedRequest, bool compressedResponse)
+        public T GetHttpRequestObject<T>(string url)
+        {
+            return this.GetHttpRequestObject<T>(url, null);
+        }
+
+        public T GetHttpRequestObject<T>(string url, object body)
+        {
+            var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
+            var jsonResponse = this.getResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json");
+
+            if (jsonResponse.StartsWith("{\"Message\":\""))
+            {
+                var errorDict = jsonResponse.ToObject<Dictionary<string, object>>();
+                throw new Exception(errorDict.ToJson());
+            }
+            return jsonResponse.ToObject<T>();
+        }
+
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        public T GetHttpRequestObject<T>(string url, bool compressedRequest, bool compressedResponse)
 		{
-			return this.GetHttpRequestObject<T>(Url, null, compressedRequest, compressedResponse);
+			return this.GetHttpRequestObject<T>(url, null, compressedRequest, compressedResponse);
 		}
 
-		public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
 		{
             var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
 			string jsonResponse;
@@ -87,11 +109,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			{
 				ZipPayload oZip = ConversionExtensions.ToCompress(jsonRequest);
 				HttpLogger.Logger.Info(oZip.GetStatistics());
-				jsonResponse = this.GetResponse(url, oZip.Bytes, this.HttpRequestTimeout, string.Empty, compressedRequest, compressedResponse, false);
+				jsonResponse = this.getResponse(url, oZip.Bytes, this.HttpRequestTimeout, string.Empty, compressedRequest, compressedResponse, false);
 			}
 			else
 			{
-				jsonResponse = this.GetResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
+				jsonResponse = this.getResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
 			}
 
             if (jsonResponse.StartsWith("{\"Message\":\""))
@@ -134,28 +156,106 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		{
 			return controllerName + this.RestfulServerExtension;
 		}
-		private string GetResponse(string url, int timeOut, bool compressedRequest, bool compressedResponse)
+
+        private string getResponse(string url, int timeOut)
+        {
+            return this.getResponse(url, "", timeOut, Encoding.UTF8, "");
+        }
+        private string getResponse(string url, Dictionary<string, string> formFields, int timeOut, Encoding encoding, string contentType)
+        {
+            return this.getResponse(url, encoding.GetString(this.GetData(formFields, encoding)), timeOut, encoding, contentType);
+        }
+        private string getResponse(string url, string body, int timeOut, Encoding encoding, string contentType)
+        {
+            return this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, false);
+        }
+
+        private string getResponse(string url, byte[] body, int timeOut, string contentType, bool triedAuthAlready)
+        {
+            string responseText = "";
+            try
+            {
+                HttpClient request = null;
+
+                var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+
+                if (HttpClientHandler == null)
+                    request = new HttpClient(compressionHandler) { BaseAddress = new Uri(url) };
+                else
+                    request = new HttpClient(HttpClientHandler) { BaseAddress = new Uri(url) };
+
+                if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
+                    this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
+                else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
+                    this.ProcessAuthentication = Handlers.ProcessOAuth;
+
+                if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
+                    this.ProcessAuthentication(request, HttpUser, HttpPassword, ref _token);
+
+                if (timeOut > 0)
+                    request.Timeout = new TimeSpan(0, 0, 0, 0, timeOut);
+
+
+                Task<HttpResponseMessage> responseTask = null;
+                if (body == null)
+                    responseTask = request.GetAsync("");
+                else
+                {
+                    var byteContent = new ByteArrayContent(body);
+                    if (!string.IsNullOrEmpty(contentType))
+                        byteContent.Headers.Add("Content-Type", contentType);
+                    responseTask = request.PostAsync("", byteContent);
+                }
+
+                HttpLogger.Logger.InfoFormat("GetHttp Request: {0}", url);
+
+                var response = responseTask.Result;
+
+                responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
+
+                HttpLogger.Logger.InfoFormat("GetHttp Response: {0}", response.StatusCode);
+                if (HttpLogger.Logger.IsDebugEnabled)
+                    HttpLogger.Logger.Debug(HttpLogger.GetLogResponse(response, responseText, 255));
+
+            }
+            catch (Exception ex)
+            {
+                HttpLogger.Logger.Error("FAIL: " + ex.Message);
+                throw new Exception(HttpLogger.GetLogResponse(url, ex));
+            }
+            return responseText;
+        }
+
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        private string getResponse(string url, int timeOut, bool compressedRequest, bool compressedResponse)
 		{
-			return this.GetResponse(url, "", timeOut, Encoding.UTF8, "", compressedRequest, compressedResponse);
+			return this.getResponse(url, "", timeOut, Encoding.UTF8, "", compressedRequest, compressedResponse);
 		}
-		private string GetResponse(string url, Dictionary<string, string> formFields, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        private string getResponse(string url, Dictionary<string, string> formFields, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
 		{
-			return this.GetResponse(url, encoding.GetString(this.GetData(formFields, encoding)), timeOut, encoding, contentType, compressedRequest, compressedResponse);
+			return this.getResponse(url, encoding.GetString(this.GetData(formFields, encoding)), timeOut, encoding, contentType, compressedRequest, compressedResponse);
 		}
-		private string GetResponse(string url, string body, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        private string getResponse(string url, string body, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
 		{
-			return this.GetResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, compressedRequest, compressedResponse, false);
+			return this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, compressedRequest, compressedResponse, false);
 		}
-		private string GetResponse(string url, byte[] body, int timeOut, string contentType, bool compressedRequest, bool compressedResponse, bool triedAuthAlready)
+        [Obsolete("Compression now done with gzip via headers and middleware")]
+        private string getResponse(string url, byte[] body, int timeOut, string contentType, bool compressedRequest, bool compressedResponse, bool triedAuthAlready)
 		{
 			string responseText = "";
 			try
 			{
                 HttpClient request = null;
+
+                var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+
                 if (HttpClientHandler == null)
-                    request = new HttpClient() { BaseAddress = new Uri(url) };
+                    request = new HttpClient(compressionHandler) { BaseAddress = new Uri(url) };
                 else
                     request = new HttpClient(HttpClientHandler) { BaseAddress = new Uri(url) };
+
 
                 if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
                     this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;

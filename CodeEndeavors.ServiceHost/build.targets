@@ -9,7 +9,7 @@
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
-        <DeployDir></DeployDir>
+        <DeployDir>$(RootDir)\..\ServiceHost</DeployDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
 
@@ -35,25 +35,48 @@
 
     <Target Name="CreateSetupPackage" DependsOnTargets="CleanRedistDir">
         <Zip Files="
-             $(TargetDir)\CodeEndeavors.Extensions.dll;
-             $(TargetDir)\$(ExternalClientName).dll;
-             $(TargetDir)\$(ExternalClientName).pdb;
-             $(TargetDir)\CodeEndeavors.ServiceHost.Common.dll;
-             $(TargetDir)\CodeEndeavors.ServiceHost.Common.pdb;
-             $(TargetDir)\Swashbuckle.Core.dll;
-             $(TargetDir)\System.Web.Http.dll;
-             $(TargetDir)\System.Web.Http.Owin.dll;
-             $(TargetDir)\System.Web.Http.WebHost.dll;
-             $(TargetDir)\System.Net.Http.Formatting.dll;
-             $(TargetDir)\Microsoft.Owin.dll;
-             $(TargetDir)\Microsoft.Owin.Host.SystemWeb.dll;
-             $(TargetDir)\Microsoft.Owin.Security.Cookies.dll;
-             $(TargetDir)\Microsoft.Owin.Security.OAuth.dll;
-             $(TargetDir)\Microsoft.Owin.Security.dll;
-             $(TargetDir)\Owin.dll;
-             $(TargetDir)\Newtonsoft.Json.dll;
-             " WorkingDirectory="$(TargetDir)\" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
-        <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+             $(TargetDir)CodeEndeavors.Extensions.dll;
+             $(TargetDir)$(ExternalClientName).dll;
+             $(TargetDir)$(ExternalClientName).pdb;
+             $(TargetDir)CodeEndeavors.ServiceHost.Common.dll;
+             $(TargetDir)CodeEndeavors.ServiceHost.Common.pdb;
+             $(TargetDir)Swashbuckle.Core.dll;
+             $(TargetDir)System.Web.Http.dll;
+             $(TargetDir)System.Web.Http.Owin.dll;
+             $(TargetDir)System.Web.Http.WebHost.dll;
+             $(TargetDir)System.Net.Http.Formatting.dll;
+             $(TargetDir)Microsoft.Owin.dll;
+             $(TargetDir)Microsoft.Owin.Host.SystemWeb.dll;
+             $(TargetDir)Microsoft.Owin.Security.Cookies.dll;
+             $(TargetDir)Microsoft.Owin.Security.OAuth.dll;
+             $(TargetDir)Microsoft.Owin.Security.dll;
+             $(TargetDir)Owin.dll;
+             $(TargetDir)Newtonsoft.Json.dll;
+             $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
+             $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
+             " WorkingDirectory="$(TargetDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+      <Zip Files="
+             $(TargetDir)CodeEndeavors.Extensions.dll;
+             $(TargetDir)$(ExternalClientName).dll;
+             $(TargetDir)CodeEndeavors.ServiceHost.Common.dll;
+             $(TargetDir)Swashbuckle.Core.dll;
+             $(TargetDir)System.Web.Http.dll;
+             $(TargetDir)System.Web.Http.Owin.dll;
+             $(TargetDir)System.Web.Http.WebHost.dll;
+             $(TargetDir)System.Net.Http.Formatting.dll;
+             $(TargetDir)Microsoft.Owin.dll;
+             $(TargetDir)Microsoft.Owin.Host.SystemWeb.dll;
+             $(TargetDir)Microsoft.Owin.Security.Cookies.dll;
+             $(TargetDir)Microsoft.Owin.Security.OAuth.dll;
+             $(TargetDir)Microsoft.Owin.Security.dll;
+             $(TargetDir)Owin.dll;
+             $(TargetDir)Newtonsoft.Json.dll;
+             $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
+             $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
+             $(MSBuildProjectDirectory)\web.config;
+             " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />
+
+      <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
     </Target>
     <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
       <Unzip TargetDirectory="%(DeployDirs.FullPath)\bin" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
