@@ -15,40 +15,35 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             DefaultHttpRequestTimeOut = 10000;
         }
 
-        public delegate T GetInProcService<T>();
-
         public static string RestfulServerExtension { get; set; }
         public static int DefaultHttpRequestTimeOut { get; set; }
 
         public static T CreateService<T>(string serviceUrl, int httpTimeOut)
         {
-            return CreateService<T>(serviceUrl, httpTimeOut, null);
+            return CreateService<T>(serviceUrl, httpTimeOut);
         }
 
-        public static T CreateService<T>(string serviceUrl, GetInProcService<T> inprocServiceDelegate)
+        public static T CreateService<T>(string serviceUrl)
         {
-            return CreateService<T>(serviceUrl, DefaultHttpRequestTimeOut, inprocServiceDelegate);
+            return CreateService<T>(serviceUrl, DefaultHttpRequestTimeOut);
         }
 
-        public static T CreateService<T>(string serviceUrl, int httpTimeOut, GetInProcService<T> inprocServiceDelegate)
+        public static T CreateService<T>(string serviceUrl, int httpTimeOut, string userName, string password, AuthenticationType authenticationType)
         {
             string classString = typeof(T).AssemblyQualifiedName; //typeof(T).FullName;
             T service = default(T);
 
             if (serviceUrl == "stub")
                 service = (T)classString.ReflectToObject();
-            else if (serviceUrl == "inproc")
-            {
-                if (inprocServiceDelegate != null)
-                    service = inprocServiceDelegate();
-                else
-                    throw new Exception("This service cannot be called inproc, not delegate passed");
-            }
             else
             {
                 if (serviceUrl.EndsWith("/") == false)
                     serviceUrl += "/";
-                service = (T)classString.ReflectToObject(serviceUrl, httpTimeOut, RestfulServerExtension);
+
+                if (authenticationType != AuthenticationType.None)
+                    service = (T)classString.ReflectToObject(serviceUrl, httpTimeOut, RestfulServerExtension, userName, password, authenticationType);
+                else 
+                    service = (T)classString.ReflectToObject(serviceUrl, httpTimeOut, RestfulServerExtension);
             }
 
             return service;
@@ -79,22 +74,22 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
         public static void Register<T>()
         {
-            Register(CreateService<T>("stub", DefaultHttpRequestTimeOut, null));
+            Register(CreateService<T>("stub"));
+        }
+
+        public static void Register<T>(string serviceUrl)
+        {
+            Register(CreateService<T>(serviceUrl, DefaultHttpRequestTimeOut));
         }
 
         public static void Register<T>(string serviceUrl, int httpTimeOut)
         {
-            Register(CreateService<T>(serviceUrl, httpTimeOut, null));
+            Register(CreateService<T>(serviceUrl, httpTimeOut, null, null, AuthenticationType.None));
         }
 
-        public static void Register<T>(string serviceUrl, GetInProcService<T> inprocServiceDelegate)
+        public static void Register<T>(string serviceUrl, int httpTimeOut, string user, string password, AuthenticationType authenticationType)
         {
-            Register(CreateService<T>(serviceUrl, DefaultHttpRequestTimeOut, inprocServiceDelegate));
-        }
-
-        public static void Register<T>(string serviceUrl, int httpTimeOut, GetInProcService<T> inprocServiceDelegate)
-        {
-            Register(CreateService<T>(serviceUrl, httpTimeOut, inprocServiceDelegate));
+            Register(CreateService<T>(serviceUrl, httpTimeOut, user, password, authenticationType));
         }
 
         public static void Register<T>(T service)
