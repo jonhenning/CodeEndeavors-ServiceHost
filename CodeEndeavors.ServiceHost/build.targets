@@ -54,6 +54,7 @@
              $(TargetDir)Newtonsoft.Json.dll;
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
+             $(TargetDir)NLog.dll;
              " WorkingDirectory="$(TargetDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
       <Zip Files="
              $(TargetDir)CodeEndeavors.Extensions.dll;
@@ -73,7 +74,7 @@
              $(TargetDir)Newtonsoft.Json.dll;
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
-             $(MSBuildProjectDirectory)\web.config;
+             $(TargetDir)NLog.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />
 
       <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />

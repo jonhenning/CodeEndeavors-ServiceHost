@@ -51,13 +51,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 				this._aquireUserIdDelegate = value;
 			}
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, null)
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, "", "", AuthenticationType.None)
 		{
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, logConfigFileName, "", "", AuthenticationType.None)
-		{
-		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string logConfigFileName, string httpUser, string httpPassword, AuthenticationType authenticationType)
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, AuthenticationType authenticationType)
 		{
 			this.HttpUser = "";
 			this.HttpPassword = "";
@@ -69,10 +66,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.HttpPassword = httpPassword;
             this.AuthenticationType = authenticationType;
 
-            if (!string.IsNullOrEmpty(logConfigFileName))
-			{
-				HttpLogger.HttpLogConfigFileName = logConfigFileName;
-			}
 			this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
 		}
 
@@ -94,37 +87,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             return jsonResponse.ToObject<T>();
         }
 
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        public T GetHttpRequestObject<T>(string url, bool compressedRequest, bool compressedResponse)
-		{
-			return this.GetHttpRequestObject<T>(url, null, compressedRequest, compressedResponse);
-		}
-
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        public T GetHttpRequestObject<T>(string url, object body, bool compressedRequest, bool compressedResponse)
-		{
-            var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
-			string jsonResponse;
-			if (compressedRequest && !string.IsNullOrEmpty(jsonRequest))
-			{
-				ZipPayload oZip = ConversionExtensions.ToCompress(jsonRequest);
-				HttpLogger.Logger.Info(oZip.GetStatistics());
-				jsonResponse = this.getResponse(url, oZip.Bytes, this.HttpRequestTimeout, string.Empty, compressedRequest, compressedResponse, false);
-			}
-			else
-			{
-				jsonResponse = this.getResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json", compressedRequest, compressedResponse);
-			}
-
-            if (jsonResponse.StartsWith("{\"Message\":\""))
-            {
-                var errorDict = jsonResponse.ToObject<Dictionary<string, object>>();
-                throw new Exception(errorDict.ToJson());
-            }
-
-
-			return jsonResponse.ToObject<T>();
-		}
 		public string RequestUrl(string method)
 		{
 			return this.RequestUrl(method, "");
@@ -207,150 +169,25 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     responseTask = request.PostAsync("", byteContent);
                 }
 
-                HttpLogger.Logger.InfoFormat("GetHttp Request: {0}", url);
+                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Request: {0}", url);
 
                 var response = responseTask.Result;
 
                 responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
 
-                HttpLogger.Logger.InfoFormat("GetHttp Response: {0}", response.StatusCode);
-                if (HttpLogger.Logger.IsDebugEnabled)
-                    HttpLogger.Logger.Debug(HttpLogger.GetLogResponse(response, responseText, 255));
+                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Response: {0}", response.StatusCode);
+                if (Logging.IsDebugEnabled)
+                    Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
 
             }
             catch (Exception ex)
             {
-                HttpLogger.Logger.Error("FAIL: " + ex.Message);
-                throw new Exception(HttpLogger.GetLogResponse(url, ex));
+                Logging.Error("FAIL: " + ex.Message);
+                throw new Exception(url.GetLogResponse(ex));
             }
             return responseText;
         }
-
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        private string getResponse(string url, int timeOut, bool compressedRequest, bool compressedResponse)
-		{
-			return this.getResponse(url, "", timeOut, Encoding.UTF8, "", compressedRequest, compressedResponse);
-		}
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        private string getResponse(string url, Dictionary<string, string> formFields, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
-		{
-			return this.getResponse(url, encoding.GetString(this.GetData(formFields, encoding)), timeOut, encoding, contentType, compressedRequest, compressedResponse);
-		}
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        private string getResponse(string url, string body, int timeOut, Encoding encoding, string contentType, bool compressedRequest, bool compressedResponse)
-		{
-			return this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, compressedRequest, compressedResponse, false);
-		}
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        private string getResponse(string url, byte[] body, int timeOut, string contentType, bool compressedRequest, bool compressedResponse, bool triedAuthAlready)
-		{
-			string responseText = "";
-			try
-			{
-                HttpClient request = null;
-
-                var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-
-                if (HttpClientHandler == null)
-                    request = new HttpClient(compressionHandler) { BaseAddress = new Uri(url) };
-                else
-                    request = new HttpClient(HttpClientHandler) { BaseAddress = new Uri(url) };
-
-
-                if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
-                    this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
-                else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
-                    this.ProcessAuthentication = Handlers.ProcessOAuth;
-
-                if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
-                    this.ProcessAuthentication(request, HttpUser, HttpPassword, ref _token);
-
-                if (timeOut > 0)
-                    request.Timeout = new TimeSpan(0, 0, 0, 0, timeOut);
-
-
-                Task<HttpResponseMessage> responseTask = null;
-                if (body == null)
-                    responseTask = request.GetAsync("");
-                else
-                {
-                    var byteContent = new ByteArrayContent(body);
-                    if (!string.IsNullOrEmpty(contentType))
-                        byteContent.Headers.Add("Content-Type", contentType);
-                    responseTask = request.PostAsync("", byteContent);
-                }
-				
-                HttpLogger.Logger.InfoFormat("GetHttp Request: {0}", url);
-
-                if (compressedRequest == false && HttpLogger.Logger.IsDebugEnabled)
-					HttpLogger.Logger.Debug(HttpLogger.GetLogRequest(request, (body == null) ? "" : ConversionExtensions.ToString(body)));
-
-                var response = responseTask.Result;
-                
-				if (compressedResponse)
-				{
-					ZipPayload zip = null;
-                    responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetTextDecompressedBase64(response, ref zip);
-					HttpLogger.Logger.Info(zip.GetStatistics());
-				}
-				else
-					responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
-
-                HttpLogger.Logger.InfoFormat("GetHttp Response: {0}", response.StatusCode);
-                if (HttpLogger.Logger.IsDebugEnabled)
-					HttpLogger.Logger.Debug(HttpLogger.GetLogResponse(response, responseText, 255));
-
-			}
-            //catch (WebException ex)
-            //{
-            //    HttpLogger.Logger.Error("FAIL: " + ex.Message);
-            //    bool flag = ex.Response != null;
-            //    if (ex.Response != null)
-            //    {
-            //        throw new Exception(HttpLogger.GetLogResponse(url, ex));
-            //        if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.Forbidden && !triedAuthAlready)
-            //        {
-            //            this._cookieJar = null;
-            //            return this.GetResponse(url, body, timeOut, contentType, compressedRequest, compressedResponse, true);
-            //        }
-            //    }
-            //    throw new Exception(HttpLogger.GetLogResponse(ex.Response, CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(ex.Response), 1000));
-            //}
-			catch (Exception ex)
-			{
-				HttpLogger.Logger.Error("FAIL: " + ex.Message);
-				throw new Exception(HttpLogger.GetLogResponse(url, ex));
-			}
-			return responseText;
-		}
-        //private CookieContainer HandleAuth()
-        //{
-        //    try
-        //    {
-        //        if (!string.IsNullOrEmpty(this.HttpUser))
-        //        {
-        //            var url = this.HttpServiceUrl.PathCombine("ServiceHostAuth" + this.RestfulServerExtension, "/").PathCombine("Authenticate", "/");
-
-        //            if (this._cookieJar == null)
-        //            {
-        //                var formFields = new Dictionary<string, string>();
-        //                formFields["user"] = this.HttpUser;
-        //                formFields["password"] = this.HttpPassword;
-        //                var req = (HttpWebRequest)WebRequest.Create(url);
-        //                req.Method = "POST";
-        //                this._cookieJar = new CookieContainer();
-        //                req.CookieContainer = this._cookieJar;
-        //                CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteText(req, ConversionExtensions.ToCompress(formFields.ToJson(false, null, true)).Bytes);
-        //                var res = (HttpWebResponse)req.GetResponse();
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        HttpLogger.Logger.Error("FAIL: " + ex.Message);
-        //    }
-        //    return this._cookieJar;
-        //}
-	}
+    }
 }
+
 

@@ -16,21 +16,6 @@ namespace CodeEndeavors.ServiceHost
     public class BaseController : ApiController
     {
         // Methods
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        protected T DeserializeCompressedRequest<T>()
-        {
-            if (System.Web.HttpContext.Current != null)
-            {
-                ZipPayload zip = null;
-                T oResult = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.DeserializeCompressedJSON<T>(System.Web.HttpContext.Current.Request, ref zip);
-                if (HttpLogger.Logger.IsDebugEnabled)
-                {
-                    HttpLogger.Logger.Debug(zip.GetStatistics());
-                }
-                return oResult;
-            }
-            return default(T);
-        }
 
         protected T DeserializeRequest<T>()
         {
@@ -53,36 +38,6 @@ namespace CodeEndeavors.ServiceHost
                 System.Web.HttpContext.Current.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(data));
             }
-        }
-
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        protected void WriteJSON(object data, bool compressed)
-        {
-            if (System.Web.HttpContext.Current != null)
-            {
-                System.Web.HttpContext.Current.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                if (compressed)
-                {
-                    ZipPayload zip = null;
-
-                    CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteCompressedJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(data), ref zip);
-                    if (HttpLogger.Logger.IsDebugEnabled)
-                        HttpLogger.Logger.Debug(zip.GetStatistics());
-                }
-                else
-                    CodeEndeavors.ServiceHost.Extensions.HttpExtensions.WriteJSON(System.Web.HttpContext.Current.Response, RuntimeHelpers.GetObjectValue(data));
-            }
-        }
-
-        [Obsolete("Compression now done with gzip via headers and middleware")]
-        protected byte[] GetCompressed(object data)
-        {
-            var json = RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true);
-
-            var zip = ConversionExtensions.ToCompress(json);
-            if (HttpLogger.Logger.IsDebugEnabled)
-                HttpLogger.Logger.Debug(zip.GetStatistics());
-            return zip.Bytes;
         }
 
     }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using CodeEndeavors.Extensions;
-using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
+//using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public double ExecutionTime;
         public string StatusMessage;
         public bool Success;
-        public string LoggerKey;
+        //public string LoggerKey;
         private List<string> _errors;
         private List<string> _messages;
         private Stopwatch _watch;
@@ -65,15 +65,12 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             this.Success = success;
             this.Data = data;
             this.StopTimer();
-            bool isDebugEnabled = Log.IsDebugEnabled;
-            if (isDebugEnabled)
-            {
-                Log.Debug(this.ToString(), LoggerKey);
-            }
+            if (Logging.IsDebugEnabled)
+                Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
         }
         public void AddException(Exception ex)
         {
-            Log.Error(ex.ToString(), LoggerKey);
+            Logging.Error(ex.ToString());
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
                 this.Errors.Add(ex.ToString());
             else

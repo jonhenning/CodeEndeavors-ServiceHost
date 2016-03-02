@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEndeavors.ServiceHost.Extensions;
+using CodeEndeavors.Extensions;
 
 namespace CodeEndeavors.ServiceHost.Common.Services
 {
@@ -34,16 +35,16 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             T service = default(T);
 
             if (serviceUrl == "stub")
-                service = (T)classString.ReflectToObject();
+                service = classString.GetInstance<T>();
             else
             {
                 if (serviceUrl.EndsWith("/") == false)
                     serviceUrl += "/";
 
                 if (authenticationType != AuthenticationType.None)
-                    service = (T)classString.ReflectToObject(serviceUrl, httpTimeOut, RestfulServerExtension, userName, password, authenticationType);
+                    service = classString.GetInstance<T>(null, serviceUrl, httpTimeOut, RestfulServerExtension, userName, password, authenticationType);
                 else 
-                    service = (T)classString.ReflectToObject(serviceUrl, httpTimeOut, RestfulServerExtension);
+                    service = classString.GetInstance<T>(null, serviceUrl, httpTimeOut, RestfulServerExtension);
             }
 
             return service;

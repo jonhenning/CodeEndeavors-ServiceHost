@@ -21,11 +21,11 @@ namespace CodeEndeavors.ServiceHost.Extensions
         {
             return HttpExtensions.GetText(request).ToObject<T>();
         }
-        public static T DeserializeCompressedJSON<T>(HttpRequest request, ref ZipPayload zip)
-        {
-            zip = ConversionExtensions.ToDecompress(request.InputStream);
-            return ConversionExtensions.ToString(zip.Bytes).ToObject<T>();
-        }
+        //public static T DeserializeCompressedJSON<T>(HttpRequest request, ref ZipPayload zip)
+        //{
+        //    zip = ConversionExtensions.ToDecompress(request.InputStream);
+        //    return ConversionExtensions.ToString(zip.Bytes).ToObject<T>();
+        //}
 
         public static string GetText(HttpResponseMessage response)
         {
@@ -77,17 +77,17 @@ namespace CodeEndeavors.ServiceHost.Extensions
         //    return ConversionExtensions.ToString(zip.Bytes);
         //}
 
-        public static string GetTextDecompressedBase64(HttpResponseMessage response, ref ZipPayload zip)
-        {
-            var text = GetText(response);
+        //public static string GetTextDecompressedBase64(HttpResponseMessage response, ref ZipPayload zip)
+        //{
+        //    var text = GetText(response);
 
-            //text is prefixed and suffixed with a quote... remove
-            text = text.TrimStart('"').TrimEnd('"');
+        //    //text is prefixed and suffixed with a quote... remove
+        //    text = text.TrimStart('"').TrimEnd('"');
 
-            var bytes = Convert.FromBase64String(text);
-            zip = ConversionExtensions.ToDecompress(bytes);
-            return ConversionExtensions.ToString(zip.Bytes);
-        }
+        //    var bytes = Convert.FromBase64String(text);
+        //    zip = ConversionExtensions.ToDecompress(bytes);
+        //    return ConversionExtensions.ToString(zip.Bytes);
+        //}
 
         public static string GetText(HttpRequest request)
         {
@@ -112,11 +112,11 @@ namespace CodeEndeavors.ServiceHost.Extensions
             var body = RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true);
             response.Write(body);
         }
-        public static void WriteCompressedJSON(HttpResponse response, object data, ref ZipPayload zip)
-        {
-            zip = ConversionExtensions.ToCompress(RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true));
-            response.BinaryWrite(zip.Bytes);
-        }
+        //public static void WriteCompressedJSON(HttpResponse response, object data, ref ZipPayload zip)
+        //{
+        //    zip = ConversionExtensions.ToCompress(RuntimeHelpers.GetObjectValue(data).ToJson(false, null, true));
+        //    response.BinaryWrite(zip.Bytes);
+        //}
         public static void WriteText(WebRequest request, byte[] body)
         {
             request.ContentLength = (long)body.Length;
@@ -134,5 +134,67 @@ namespace CodeEndeavors.ServiceHost.Extensions
                 }
             }
         }
+
+        public static string GetLogRequest(this WebRequest request, string body)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("REQUEST: {0} [{1}]", request.RequestUri, request.Method));
+            sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", request.ContentType, request.Timeout));
+            if (body != null)
+            {
+                if (body.ToLower().IndexOf("password") == -1)
+                {
+                    if (body.Length > 255)
+                        sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, 255)));
+                    else
+                        sb.AppendLine(string.Format("Body: {0} ", body));
+                }
+                else
+                    sb.AppendLine(string.Format("Body: {0} ", "[NOT LOGGING PASSWORDS]"));
+            }
+            return sb.ToString();
+        }
+        public static string GetLogRequest(this HttpClient request, string body)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("REQUEST: {0} [{1}]", request.BaseAddress, string.IsNullOrEmpty(body) ? "GET" : "POST"));
+            sb.AppendLine(string.Format("ContentType: {0}, Timeout: {1}", request.DefaultRequestHeaders.Accept, request.Timeout));
+            if (body != null)
+            {
+                if (body.ToLower().IndexOf("password") == -1)
+                {
+                    if (body.Length > 255)
+                        sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, 255)));
+                    else
+                        sb.AppendLine(string.Format("Body: {0} ", body));
+                }
+                else
+                    sb.AppendLine(string.Format("Body: {0} ", "[NOT LOGGING PASSWORDS]"));
+            }
+            return sb.ToString();
+        }
+        public static string GetLogResponse(this string url, Exception ex)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("RESPONSE: {0}", url));
+            sb.AppendLine(string.Format("RESPONSE EXCEPTION: {0}", ex.Message));
+            return sb.ToString();
+        }
+
+        public static string GetLogResponse(this HttpResponseMessage response, string body, int numChars)
+        {
+            var sb = new StringBuilder();
+            if (response != null)
+            {
+                sb.AppendLine(string.Format("RESPONSE: {0} [{1}]", response.RequestMessage, response.StatusCode));
+                //sb.AppendLine(string.Format("ContentType: {0}", oHttpResponse.ContentType));
+                if (body.Length > numChars)
+                    sb.AppendLine(string.Format("Body: {0}.......", body.Substring(0, numChars)));
+                else
+                    sb.AppendLine(string.Format("Body: {0} ", body));
+            }
+            return sb.ToString();
+        }
+
     }
 }

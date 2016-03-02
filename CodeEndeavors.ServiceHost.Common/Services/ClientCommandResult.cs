@@ -1,5 +1,5 @@
 ﻿using CodeEndeavors.Extensions;
-using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
+//using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 		public TimeSpan ExecutionTime;
 		public TimeSpan ServerExecutionTime;
 		public string StatusMessage;
-        public string LoggerKey;
+        //public string LoggerKey;
 		public bool Success;
 		private List<string> _errors;
 		private List<string> _messages;
@@ -61,11 +61,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.Success = success;
 			this.Data = data;
 			this.StopTimer();
-			bool isDebugEnabled = Log.IsDebugEnabled;
-			if (isDebugEnabled)
-			{
-				Log.Debug(this.ToString(), this.LoggerKey);
-			}
+            if (Logging.IsDebugEnabled)
+				Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
 		}
 		public void ReportResult(ServiceResult<T> result, bool success)
 		{
@@ -74,8 +71,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.ServerExecutionTime = new TimeSpan(0, 0, 0, (int)Math.Round(result.ExecutionTime / 1000.0), (int)Math.Round(result.ExecutionTime % 1000.0));
 			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			if (Log.IsDebugEnabled)
-                Log.Debug(this.ToString(), this.LoggerKey);
+            if (Logging.IsDebugEnabled)
+                Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
 		}
 		public void ReportResult(ClientCommandResult<T> result, bool success)
 		{
@@ -84,8 +81,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.ServerExecutionTime = result.ServerExecutionTime;
 			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			if (Log.IsDebugEnabled)
-                Log.Debug(this.ToString(), this.LoggerKey);
+            if (Logging.IsDebugEnabled)
+                Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
 		}
 		public void ReportResult<T2>(ClientCommandResult<T2> result, T data, bool success)
 		{
@@ -94,12 +91,12 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.ServerExecutionTime = result.ServerExecutionTime;
 			this.Errors.AddRange(result.Errors);
 			this.StopTimer();
-			if (Log.IsDebugEnabled)
-                Log.Debug(this.ToString(), this.LoggerKey);
+            if (Logging.IsDebugEnabled)
+                Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
 		}
 		public void AddException(Exception ex)
 		{
-            Log.Error(ex.ToString(), this.LoggerKey);
+            Logging.Error(ex.ToString());
 			this.Errors.Add(ex.ToString());
 		}
 		public void StartTimer()

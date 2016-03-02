@@ -1,4 +1,5 @@
 ﻿using CodeEndeavors.ServiceHost.Common;
+using CodeEndeavors.ServiceHost.Common.Services;
 using Microsoft.Owin;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,9 @@ namespace CodeEndeavors.ServiceHost.Middleware
         {
             var context = new OwinContext(env);
 
-            if (HttpLogger.Logger.IsDebugEnabled)
+            if (Logging.IsDebugEnabled)
             {
-                HttpLogger.Logger.Debug(context.Request.Uri.AbsoluteUri);
+                Logging.Log(Logging.LoggingLevel.Debug, context.Request.Uri.AbsoluteUri);
 
                 //http://stackoverflow.com/questions/26214113/how-can-i-safely-intercept-the-response-stream-in-a-custom-owin-middleware
                 // Buffer the response
@@ -33,12 +34,15 @@ namespace CodeEndeavors.ServiceHost.Middleware
     
                 await _next(env);
 
-                buffer.Seek(0, SeekOrigin.Begin);
-                var reader = new StreamReader(buffer);
-                string responseBody = await reader.ReadToEndAsync();
+                if (Logging.IsDebugEnabled)
+                {
+                    buffer.Seek(0, SeekOrigin.Begin);
+                    var reader = new StreamReader(buffer);
+                    string responseBody = await reader.ReadToEndAsync();
 
-                // Now, you can access response body.
-                HttpLogger.Logger.Debug(getLogResponse(context.Response, responseBody));
+                    // Now, you can access response body.
+                    Logging.Log(Logging.LoggingLevel.Debug, getLogResponse(context.Response, responseBody));
+                }
 
                 // You need to do this so that the response we buffered
                 // is flushed out to the client application.
@@ -52,8 +56,13 @@ namespace CodeEndeavors.ServiceHost.Middleware
 
         private string getLogResponse(IOwinResponse response, string body)
         {
-            if (!string.IsNullOrEmpty(body) && body.Length > 255)
-                body = body.Substring(0, 255);
+            if (response.Headers.ContainsKey("Content-Encoding") && response.Headers["Content-Encoding"] == "gzip")
+                body = "gzipped body";
+            else
+            {
+                if (!string.IsNullOrEmpty(body) && body.Length > 255)
+                    body = body.Substring(0, 255);
+            }
             return string.Format("Url: {0}  Status: {1}  Length: {2}\r\n{3}   ", response.Environment["owin.RequestPath"], response.StatusCode, response.ContentLength, body);
         }
 

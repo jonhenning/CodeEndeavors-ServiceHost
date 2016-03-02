@@ -11,14 +11,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public delegate void ClientCommandResultHandler<T>(ClientCommandResult<T> result) where T : new();
         public delegate void ServiceResultHandler<T>(ServiceResult<T> result); //where T : new();
         public delegate ClientCommandResult<T> ExecuteClientHandler<T>() where T : new();
+
         public static ClientCommandResult<T> ExecuteClientResult<T>(ClientCommandResultHandler<T> codeFunc) where T : new()
         {
-            return ExecuteClientResult<T>(HttpLogger.HttpLoggerKey, codeFunc);
-        }
-        public static ClientCommandResult<T> ExecuteClientResult<T>(string loggerKey, ClientCommandResultHandler<T> codeFunc) where T : new()
-        {
             var result = new ClientCommandResult<T>(true);
-            result.LoggerKey = loggerKey;
+            //result.LoggerKey = loggerKey;
             try
             {
                 codeFunc.Invoke(result);
@@ -36,13 +33,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
         public static ServiceResult<T> ExecuteServiceResult<T>(ServiceResultHandler<T> codeFunc) //where T : new()
         {
-            return ExecuteServiceResult<T>(null, codeFunc);
-        }
-
-        public static ServiceResult<T> ExecuteServiceResult<T>(string loggerKey, ServiceResultHandler<T> codeFunc) //where T : new()
-        {
             var result = new ServiceResult<T>(true);
-            result.LoggerKey = loggerKey;
             try
             {
                 codeFunc.Invoke(result);

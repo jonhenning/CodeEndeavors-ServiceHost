@@ -1,6 +1,6 @@
 ﻿using CodeEndeavors.ServiceHost.Common;
 using CodeEndeavors.ServiceHost.Common.Services;
-using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
+//using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
 using System;
 using System.Configuration;
 using System.Linq;
@@ -14,9 +14,9 @@ namespace CodeEndeavors.ServiceHost
     {
         private System.Reflection.Assembly _callingAssembly;
         private Configuration _config;
-        private ServiceLogger _logger;
+        //private ServiceLogger _logger;
         private string _satilliteName;
-        protected string _serviceLogKey;
+        //protected string _serviceLogKey;
         protected Configuration Config
         {
             get
@@ -30,50 +30,50 @@ namespace CodeEndeavors.ServiceHost
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error("OpenExeConfiguration", ex);
+                        Logging.Error(ex, "OpenExeConfiguration");
                     }
                 }
                 return _config;
             }
         }
 
-        protected ServiceLogger Logger
-        {
-            get
-            {
-                return this._logger;
-            }
-        }
+        //protected ServiceLogger Logger
+        //{
+        //    get
+        //    {
+        //        return this._logger;
+        //    }
+        //}
         protected BaseService()
         {
             this._callingAssembly = null;
             this._config = null;
-            this._logger = null;
+            //this._logger = null;
             this._satilliteName = "";
         }
         public void Application_Error(object sender, System.EventArgs e)
         {
             System.Exception lastError = System.Web.HttpContext.Current.Server.GetLastError();
-            this.Logger.Error("Application_Error", lastError);
+            Logging.Error(lastError.Message);
         }
         
         protected void Configure(string logConfigFileName, string serviceLogKey)
         {
             this._callingAssembly = System.Reflection.Assembly.GetCallingAssembly();
-            _serviceLogKey = serviceLogKey;
-            this._logger = new ServiceLogger(logConfigFileName, serviceLogKey);
-            this.Logger.Info(string.Format("{0} Service configured", base.GetType().ToString()));
-            bool flag = !string.IsNullOrEmpty(logConfigFileName);
-            if (flag)
-            {
-                HttpLogger.HttpLogConfigFileName = logConfigFileName;
-            }
+            //_serviceLogKey = serviceLogKey;
+            //this._logger = new ServiceLogger(logConfigFileName, serviceLogKey);
+            //this.Logger.Info(string.Format("{0} Service configured", base.GetType().ToString()));
+            //bool flag = !string.IsNullOrEmpty(logConfigFileName);
+            //if (flag)
+            //{
+            //    HttpLogger.HttpLogConfigFileName = logConfigFileName;
+            //}
             //Startup.Application_Error += new Startup.ApplicationErrorHandler(this.Application_Error);
         }
 
         protected ServiceResult<T> ExecuteServiceResult<T>(Helpers.ServiceResultHandler<T> codeFunc) //where T : new()
         {
-            return Helpers.ExecuteServiceResult<T>(_serviceLogKey, codeFunc);
+            return Helpers.ExecuteServiceResult<T>(codeFunc);
         }
 
         protected string GetConnectionString(string key, string defaultValue)
@@ -89,7 +89,7 @@ namespace CodeEndeavors.ServiceHost
             }
             catch (Exception ex)
             {
-                Log.Error("GetConnectionString", ex);
+                Logging.Error(ex, "GetConnectionString");
             }
 
             return defaultValue;

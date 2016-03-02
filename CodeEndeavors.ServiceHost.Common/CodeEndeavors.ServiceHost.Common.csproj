@@ -32,16 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CodeEndeavors.Extensions, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CodeEndeavors.Extensions.2.0.5\lib\net45\CodeEndeavors.Extensions.dll</HintPath>
+    <Reference Include="CodeEndeavors.Extensions, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CodeEndeavors.Extensions.2.0.7\lib\net45\CodeEndeavors.Extensions.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -66,22 +59,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\HttpExtensions.cs" />
-    <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="HttpLogger.cs" />
-    <Compile Include="LoggingServices\ILog.cs" />
-    <Compile Include="LoggingServices\Log.cs" />
-    <Compile Include="LoggingServices\Log4NetConfig.cs" />
-    <Compile Include="LoggingServices\Log4NetLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeDictionary.cs" />
     <Compile Include="Services\Handlers.cs" />
     <Compile Include="Services\Helpers.cs" />
+    <Compile Include="Services\Logging.cs" />
     <Compile Include="Services\ServiceLocator.cs" />
     <Compile Include="Services\BaseClientHttpService.cs" />
-    <Compile Include="Services\CacheItem.cs" />
-    <Compile Include="Services\CacheState.cs" />
     <Compile Include="Services\ClientCommandResult.cs" />
     <Compile Include="Services\ServiceResult.cs" />
     <Compile Include="ZipPayload.cs" />
