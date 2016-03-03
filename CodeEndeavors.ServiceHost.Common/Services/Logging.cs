@@ -37,6 +37,14 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         {
             Log(LoggingLevel.Info, msg, args);
         }
+        public static void Debug(string msg)
+        {
+            Debug(msg, "");
+        }
+        public static void Debug(string msg, params object[] args)
+        {
+            Log(LoggingLevel.Debug, msg, args);
+        }
 
         public static void Log(LoggingLevel level, string msg)
         {

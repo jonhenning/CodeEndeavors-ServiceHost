@@ -8,30 +8,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 {
     public class Helpers
     {
-        public delegate void ClientCommandResultHandler<T>(ClientCommandResult<T> result) where T : new();
-        public delegate void ServiceResultHandler<T>(ServiceResult<T> result); //where T : new();
-        public delegate ClientCommandResult<T> ExecuteClientHandler<T>() where T : new();
-
-        public static ClientCommandResult<T> ExecuteClientResult<T>(ClientCommandResultHandler<T> codeFunc) where T : new()
-        {
-            var result = new ClientCommandResult<T>(true);
-            //result.LoggerKey = loggerKey;
-            try
-            {
-                codeFunc.Invoke(result);
-            }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            finally
-            {
-                result.StopTimer();
-            }
-            return result;
-        }
-
-        public static ServiceResult<T> ExecuteServiceResult<T>(ServiceResultHandler<T> codeFunc) //where T : new()
+        public static ServiceResult<T> ExecuteServiceResult<T>(Action<ServiceResult<T>> codeFunc) //where T : new()
         {
             var result = new ServiceResult<T>(true);
             try
@@ -63,14 +40,5 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
             return null;
         }
-
-        public static T ExecuteClient<T>(ExecuteClientHandler<T> codeFunc) where T: new()
-        {
-            var cr = codeFunc.Invoke();
-            if (cr.Success)
-                return cr.Data;
-            throw new Exception(cr.ToString());
-        }
-
     }
 }
