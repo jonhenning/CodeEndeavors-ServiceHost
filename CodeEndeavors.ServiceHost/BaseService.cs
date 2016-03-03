@@ -57,7 +57,7 @@ namespace CodeEndeavors.ServiceHost
             Logging.Error(lastError.Message);
         }
         
-        protected void Configure(string logConfigFileName, string serviceLogKey)
+        protected void Configure()
         {
             this._callingAssembly = System.Reflection.Assembly.GetCallingAssembly();
             //_serviceLogKey = serviceLogKey;
