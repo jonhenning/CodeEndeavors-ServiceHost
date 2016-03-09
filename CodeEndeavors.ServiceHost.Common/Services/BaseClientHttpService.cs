@@ -51,10 +51,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 				this._aquireUserIdDelegate = value;
 			}
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, "", "", AuthenticationType.None)
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, "", "", "None")
 		{
 		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, AuthenticationType authenticationType)
+		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, string authenticationType)
 		{
 			this.HttpUser = "";
 			this.HttpPassword = "";
@@ -64,7 +64,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 			this.HttpRequestTimeout = requestTimeout;
 			this.HttpUser = httpUser;
 			this.HttpPassword = httpPassword;
-            this.AuthenticationType = authenticationType;
+            this.AuthenticationType = authenticationType.ToType<AuthenticationType>();
 
 			this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
 		}
