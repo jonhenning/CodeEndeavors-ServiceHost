@@ -75,6 +75,8 @@
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
+             $(MSBuildProjectDirectory)\web.config;
+             $(MSBuildProjectDirectory)\nlog.config;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />
 
       <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
