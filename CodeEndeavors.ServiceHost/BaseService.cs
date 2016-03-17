@@ -1,4 +1,5 @@
-﻿using CodeEndeavors.ServiceHost.Common;
+﻿using CodeEndeavors.Extensions;
+using CodeEndeavors.ServiceHost.Common;
 using CodeEndeavors.ServiceHost.Common.Services;
 //using CodeEndeavors.ServiceHost.Common.Services.LoggingServices;
 using System;
@@ -35,6 +36,13 @@ namespace CodeEndeavors.ServiceHost
                 }
                 return _config;
             }
+        }
+
+        protected T GetConfigSetting<T>(string key, T defaultValue)
+        {
+            if (Config.AppSettings.Settings[key] != null)
+                return Config.AppSettings.Settings[key].ToType<T>();
+            return defaultValue;
         }
 
         //protected ServiceLogger Logger
