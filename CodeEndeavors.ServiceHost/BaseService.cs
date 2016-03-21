@@ -41,7 +41,7 @@ namespace CodeEndeavors.ServiceHost
         protected T GetConfigSetting<T>(string key, T defaultValue)
         {
             if (Config.AppSettings.Settings[key] != null)
-                return Config.AppSettings.Settings[key].ToType<T>();
+                return Config.AppSettings.Settings[key].Value.ToType<T>();
             return defaultValue;
         }
 
