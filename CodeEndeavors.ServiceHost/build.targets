@@ -88,8 +88,8 @@
     </Target>
     <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
         <!--<Unzip TargetDirectory="%(DeployDirs.FullPath)\bin" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
-        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" />
-        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).Install.zip" DestinationFolder="%(ProvisioningDirs.FullPath)" Condition="$(ProvisioningDir) != ''" />
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" Condition="$(DeployDir) != ''"/>
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip;$(RedistDir)\$(ExternalClientName).Install.zip" DestinationFolder="%(ProvisioningDirs.FullPath)" Condition="$(ProvisioningDir) != ''" />
     </Target>
 
 </Project>
