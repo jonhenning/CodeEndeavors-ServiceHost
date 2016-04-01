@@ -3,21 +3,24 @@
     <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
     <PropertyGroup>
         <ExternalClientName>CodeEndeavors.ServiceHost</ExternalClientName>
-        <DeployDir></DeployDir>
     </PropertyGroup>
 
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
-        <DeployDir>$(RootDir)\..\ServiceHost</DeployDir>
+        <DeployDir></DeployDir>
+        <ProvisioningDir></ProvisioningDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
 
     <ItemGroup>
-      <DeployDirs Include="$(DeployDir)" />
+        <DeployDirs Include="$(DeployDir)" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProvisioningDirs Include="$(ProvisioningDir)" />
     </ItemGroup>
 
-  <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
+    <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
 
     <Target Name="AfterBuild">
         <CallTarget Targets="CreateSetupPackage" />
@@ -55,8 +58,9 @@
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
-             " WorkingDirectory="$(TargetDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
-      <Zip Files="
+             $(TargetDir)ICSharpCode.SharpZipLib.dll;
+             " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+        <Zip Files="
              $(TargetDir)CodeEndeavors.Extensions.dll;
              $(TargetDir)$(ExternalClientName).dll;
              $(TargetDir)CodeEndeavors.ServiceHost.Common.dll;
@@ -75,14 +79,17 @@
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
+             $(TargetDir)ICSharpCode.SharpZipLib.dll;
              $(MSBuildProjectDirectory)\web.config;
              $(MSBuildProjectDirectory)\nlog.config;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />
 
-      <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+        <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
     </Target>
     <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
-      <Unzip TargetDirectory="%(DeployDirs.FullPath)\bin" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+        <!--<Unzip TargetDirectory="%(DeployDirs.FullPath)\bin" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" />
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).Install.zip" DestinationFolder="%(ProvisioningDirs.FullPath)" Condition="$(ProvisioningDir) != ''" />
     </Target>
 
 </Project>
