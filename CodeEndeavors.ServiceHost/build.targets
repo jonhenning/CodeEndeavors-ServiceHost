@@ -84,6 +84,8 @@
              $(MSBuildProjectDirectory)\nlog.config;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />
 
+        <Copy SourceFiles="$(TargetDir)$(ExternalClientName).dll;" DestinationFolder="$(RedistDir)" />
+        
         <!--<Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
     </Target>
     <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
