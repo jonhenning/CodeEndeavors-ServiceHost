@@ -17,6 +17,6 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="CodeEndeavors.ServiceHost.Common.dll" target="lib\2.0\CodeEndeavors.ServiceHost.Common.dll" />
+        <file src="CodeEndeavors.ServiceHost.Common.Net2.dll" target="lib\2.0\CodeEndeavors.ServiceHost.Common.Net2.dll" />
     </files>
 </package>
