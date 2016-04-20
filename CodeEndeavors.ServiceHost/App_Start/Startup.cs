@@ -36,7 +36,6 @@ namespace CodeEndeavors.ServiceHost.App_Start
                 //config.MessageHandlers.Add(new OwinServerCompressionHandler());
             }
 
-            Update.WatchForUpdates();
             SwaggerConfig.Register(config);
             WebApiConfig.Register(config);
             LoggingConfig.Register(config);
@@ -59,6 +58,8 @@ namespace CodeEndeavors.ServiceHost.App_Start
             }
 
             app.UseWebApi(config);  //must be last
+
+            Update.WatchForUpdates();
 
         }
 
