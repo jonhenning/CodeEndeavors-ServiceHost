@@ -37,19 +37,5 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             };
         }
 
-        public static void Register(string url, int requestTimeout)
-        {
-            var st = new StackTrace();
-            var type = st.GetFrame(1).GetMethod().DeclaringType;
-
-            //var type = MethodBase.GetCurrentMethod().DeclaringType;
-
-            var mi = typeof(ServiceLocator).GetMethod("Register", new Type[] { typeof(string), typeof(int) });
-            var method = mi.MakeGenericMethod(type);
-            method.Invoke(null, new object[] { url, requestTimeout });
-
-            //ServiceLocator.Register<Client.PowerNETAccount>(url, requestTimeout);
-        }
-
     }
 }
