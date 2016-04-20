@@ -11,10 +11,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Common library for services using CodeEndeavors.ServiceHost</description>
         <dependencies>
-            <dependency id="CodeEndeavors.Extensions" version="1.0.9" />
+            <dependency id="CodeEndeavors.Extensions" version="2.0.8" />
         </dependencies>
         <frameworkAssemblies>
-            <frameworkAssembly assemblyName="System.Web" targetFramework="" />
         </frameworkAssemblies>
     </metadata>
     <files>

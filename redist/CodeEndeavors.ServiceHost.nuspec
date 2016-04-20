@@ -11,10 +11,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Base classes for services implementing CodeEndeavors.ServiceHost</description>
         <dependencies>
-            <dependency id="CodeEndeavors.ServiceHost.Common" version="2.0.20" />
+            <dependency id="CodeEndeavors.ServiceHost.Common" version="2.0.21" />
         </dependencies>
         <frameworkAssemblies>
-            <frameworkAssembly assemblyName="System.Web" targetFramework="" />
         </frameworkAssemblies>
     </metadata>
     <files>
