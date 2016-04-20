@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\BaseClient.cs" />
     <Compile Include="Client\ClientCommandResult.cs" />
     <Compile Include="Extensions\HttpExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -70,7 +71,9 @@
     <Compile Include="Services\ServiceResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="build.targets" />
+    <Content Include="build.targets">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
