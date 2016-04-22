@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using System.Web.Hosting;
@@ -38,12 +39,15 @@ namespace CodeEndeavors.ServiceHost
             }
         }
 
+        public static bool Initialized { get; set; }
+
         public static void WatchForUpdates()
         {
             Common.Services.Logging.Debug("Watching folder {0} for updates", UpdateDir);
             ApplyUpdates();
             //using cache dependency to easily monitor update folder for changes
             HttpRuntime.Cache.Add("_updates", "", new CacheDependency(UpdateDir), Cache.NoAbsoluteExpiration, TimeSpan.FromHours(1), CacheItemPriority.NotRemovable, new CacheItemRemovedCallback(OnFolderChanged));
+            Initialized = true;
         }
 
         private static void OnFolderChanged(string key, object value, CacheItemRemovedReason reason)
@@ -70,14 +74,13 @@ namespace CodeEndeavors.ServiceHost
             }
         }
 
-        public static int ApplyUpdates()
+        public static void ApplyUpdates()
         {
             var dir = new DirectoryInfo(UpdateDir);
             var count = 0;
             var files = dir.GetFiles("*.zip");
             foreach (var file in files)
                 count += InstallFile(file.FullName) ? 1 : 0;
-            return count;
         }
 
         public static bool InstallFile(string fileName, string portalId = null)
@@ -89,9 +92,11 @@ namespace CodeEndeavors.ServiceHost
                 case ".zip":
                     {
                         var packageFileName = Path.Combine(PackageDir, new FileInfo(fileName).Name);
-                        if (File.Exists(packageFileName))
-                            File.Delete(packageFileName);
-                        File.Move(fileName, packageFileName);
+                        File.Copy(fileName, packageFileName, true);
+                        File.Delete(fileName);
+                        //if (File.Exists(packageFileName))
+                        //    File.Delete(packageFileName);
+                        //File.Move(fileName, packageFileName);
 
                         //if dll in root, then we need to extract directly into bin folder
                         var rootContainsDll = GetZipFileList(packageFileName, e => e.IndexOf("/") == -1 && e.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase)).Count > 0;

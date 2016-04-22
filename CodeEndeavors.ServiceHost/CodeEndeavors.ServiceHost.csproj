@@ -152,6 +152,8 @@
     <Compile Include="Middleware\BasicAuthenticationMiddleware.cs" />
     <Compile Include="Middleware\BasicAuthenticationMiddlewareExtensions.cs" />
     <Compile Include="Middleware\BasicAuthenticationOptions.cs" />
+    <Compile Include="Middleware\ExceptionMiddleware.cs" />
+    <Compile Include="Middleware\InstallerMiddleware.cs" />
     <Compile Include="Middleware\LoggingMiddleware.cs" />
     <Compile Include="Middleware\UserContextHandler.cs" />
     <Compile Include="Resources.cs" />

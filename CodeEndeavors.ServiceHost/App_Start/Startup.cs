@@ -22,6 +22,8 @@ namespace CodeEndeavors.ServiceHost.App_Start
         {
             //application.Error += new EventHandler(GlobalError);
 
+            app.Use(typeof(Middleware.ExceptionMiddleware));
+            app.Use(typeof(Middleware.InstallerMiddleware));
 
             //GlobalConfig = new HttpConfiguration();
             var config = new HttpConfiguration();
@@ -59,7 +61,7 @@ namespace CodeEndeavors.ServiceHost.App_Start
 
             app.UseWebApi(config);  //must be last
 
-            Update.WatchForUpdates();
+            //Update.WatchForUpdates();
 
         }
 
