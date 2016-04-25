@@ -3,7 +3,7 @@
     <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
     <PropertyGroup>
         <ProjectFullName>CodeEndeavors.ServiceHost.Common.Net2</ProjectFullName>
-        <DeployDir></DeployDir>
+        <DeployDirNET2></DeployDirNET2>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -32,9 +32,9 @@
         <Zip Files="$(TargetDir)\$(ProjectFullName).dll;" WorkingDirectory="$(TargetDir)\" ZipFileName="$(RedistDir)\$(ProjectFullName).zip" />
         <Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ProjectFullName).zip" />
     </Target>
-    <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
-        <MakeDir Directories="$(DeployDir)\bin" />
-        <Copy SourceFiles="$(RedistDir)\$(ProjectFullName).dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
+    <Target Name="DeployPackage" Condition="$(DeployDirNET2) != ''">
+        <MakeDir Directories="$(DeployDirNET2)\bin" />
+        <Copy SourceFiles="$(RedistDir)\$(ProjectFullName).dll" DestinationFolder="$(DeployDirNET2)\bin" SkipUnchangedFiles="false" />
     </Target>
 
 </Project>
