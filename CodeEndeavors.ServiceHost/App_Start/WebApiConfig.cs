@@ -19,6 +19,8 @@ namespace CodeEndeavors.ServiceHost
             var formatters = config.Formatters;
             formatters.Remove(formatters.XmlFormatter);
             formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            formatters.JsonFormatter.SerializerSettings.ContractResolver = new CodeEndeavors.Extensions.Serialization.SerializeIgnoreContractResolver(null);
+
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

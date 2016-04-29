@@ -60,8 +60,7 @@ namespace CodeEndeavors.ServiceHost.Extensions
             var format = pretty ? Formatting.Indented : Formatting.None;
             var settings = new JsonSerializerSettings();
             settings.Converters.Add(new IsoDateTimeConverter() { DateTimeStyles = System.Globalization.DateTimeStyles.AdjustToUniversal });
-            if (!string.IsNullOrEmpty(ignoreType))
-                settings.ContractResolver = new CodeEndeavors.ServiceHost.Common.Serialization.SerializeIgnoreContractResolver(ignoreType);
+            settings.ContractResolver = new CodeEndeavors.ServiceHost.Common.Serialization.SerializeIgnoreContractResolver(ignoreType);
             if (preserveObjectReferences)
                 settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
             return JsonConvert.SerializeObject(obj, format, settings);
