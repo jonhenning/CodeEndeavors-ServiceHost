@@ -105,7 +105,11 @@ namespace CodeEndeavors.ServiceHost
         private static List<string> getScripts(string tenant, int version, Assembly assembly)
         {
             var names = Resources.GetNames(string.Format("schema.{0}.v{1}", tenant, version), assembly);
-            return names.Select(n => Resources.GetText(n, assembly)).ToList();
+            return names.SelectMany(n => 
+            {
+                var text = Resources.GetText(n, assembly);
+                return text.Split(new[] { "GO" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            }).ToList();
         }
 
         private static void migrateSchema(Assembly assembly, string connectionString, string databaseSchemaForVersionTable)
