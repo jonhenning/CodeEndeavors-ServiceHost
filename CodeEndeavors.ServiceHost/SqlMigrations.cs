@@ -26,16 +26,25 @@ namespace CodeEndeavors.ServiceHost
 
         public static void Migrate(string connection)
         {
+            Migrate(connection, false);
+        }
+
+        public static void Migrate(string connection, bool alwaysApplyCurrentVersion)
+        {
             var assembly = Assembly.GetCallingAssembly();
             Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
-            migrateSchema(assembly, connection, "dbo");
+            migrateSchema(assembly, connection, "dbo", alwaysApplyCurrentVersion);
         }
 
         public static void Migrate(string connection, string databaseSchemaForVersionTable)
         {
+            Migrate(connection, databaseSchemaForVersionTable, false);
+        }
+        public static void Migrate(string connection, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
+        {
             var assembly = Assembly.GetCallingAssembly();
             Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
-            migrateSchema(assembly, connection, databaseSchemaForVersionTable);
+            migrateSchema(assembly, connection, databaseSchemaForVersionTable, alwaysApplyCurrentVersion);
         }
 
         private static DataTable getData(string sql, SqlConnection connection)
@@ -112,7 +121,7 @@ namespace CodeEndeavors.ServiceHost
             }).ToList();
         }
 
-        private static void migrateSchema(Assembly assembly, string connectionString, string databaseSchemaForVersionTable)
+        private static void migrateSchema(Assembly assembly, string connectionString, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -131,7 +140,7 @@ namespace CodeEndeavors.ServiceHost
 
                     foreach (var version in versions)
                     {
-                        if (version > currentVersion)
+                        if (version > currentVersion || (version == currentVersion && alwaysApplyCurrentVersion))
                         {
                             var scripts = getScripts(tenant, version, assembly);
                             scripts.ForEach(s => executeSql(s, connection));
