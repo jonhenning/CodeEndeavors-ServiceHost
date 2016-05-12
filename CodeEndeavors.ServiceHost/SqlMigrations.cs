@@ -29,6 +29,13 @@ namespace CodeEndeavors.ServiceHost
             Migrate(connection, false);
         }
 
+        public static void Migrate(Dictionary<string, string> tenantConnections, bool alwaysApplyCurrentVersion)
+        {
+            var assembly = Assembly.GetCallingAssembly();
+            Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
+            migrateSchema(assembly, tenantConnections, "dbo", alwaysApplyCurrentVersion);
+        }
+
         public static void Migrate(string connection, bool alwaysApplyCurrentVersion)
         {
             var assembly = Assembly.GetCallingAssembly();
@@ -45,6 +52,13 @@ namespace CodeEndeavors.ServiceHost
             var assembly = Assembly.GetCallingAssembly();
             Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
             migrateSchema(assembly, connection, databaseSchemaForVersionTable, alwaysApplyCurrentVersion);
+        }
+
+        public static void Migrate(Dictionary<string, string> tenantConnections, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
+        {
+            var assembly = Assembly.GetCallingAssembly();
+            Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
+            migrateSchema(assembly, tenantConnections, databaseSchemaForVersionTable, alwaysApplyCurrentVersion);
         }
 
         private static DataTable getData(string sql, SqlConnection connection)
@@ -123,32 +137,43 @@ namespace CodeEndeavors.ServiceHost
 
         private static void migrateSchema(Assembly assembly, string connectionString, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
         {
-            using (var connection = new SqlConnection(connectionString))
+            var tenantConnections = getTenants(assembly).ToDictionary(t => t, c => connectionString);
+            migrateSchema(assembly, tenantConnections, databaseSchemaForVersionTable, alwaysApplyCurrentVersion);
+        }
+        private static void migrateSchema(Assembly assembly, Dictionary<string, string> tenantConnections, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
+        {
+            foreach (var tenantName in tenantConnections.Keys)
             {
-                connection.Open();
-
-                ensureSchema(assembly, connection, databaseSchemaForVersionTable);
-
-                var tenants = getTenants(assembly);
-                foreach (var tenant in tenants)
+                using (var connection = new SqlConnection(tenantConnections[tenantName]))
                 {
-                    var currentVersion = getSchemaVersion(tenant, connection, databaseSchemaForVersionTable);
-                    var versions = getTenantVersions(tenant, assembly);
-                    var maxVersion = versions.Max();
+                    connection.Open();
 
-                    Logging.Log(Logging.LoggingLevel.Info, "Tenant {0} - current version:{1}  - max version:{2}", tenant, currentVersion, maxVersion);
+                    ensureSchema(assembly, connection, databaseSchemaForVersionTable);
 
-                    foreach (var version in versions)
+                    var tenant = getTenants(assembly).Where(t => t == tenantName).FirstOrDefault();
+                    if (tenant != null)
                     {
-                        if (version > currentVersion || (version == currentVersion && alwaysApplyCurrentVersion))
-                        {
-                            var scripts = getScripts(tenant, version, assembly);
-                            scripts.ForEach(s => executeSql(s, connection));
+                        //foreach (var tenant in tenants)
+                        //{
+                        var currentVersion = getSchemaVersion(tenant, connection, databaseSchemaForVersionTable);
+                        var versions = getTenantVersions(tenant, assembly);
+                        var maxVersion = versions.Max();
 
-                            Logging.Log(Logging.LoggingLevel.Info, "Updating schema {0} version to {1}, executing {2} scripts", tenant, version, scripts.Count);
-                            updateSchemaVersion(tenant, version, connection, databaseSchemaForVersionTable);
+                        Logging.Log(Logging.LoggingLevel.Info, "Tenant {0} - current version:{1}  - max version:{2}", tenant, currentVersion, maxVersion);
+
+                        foreach (var version in versions)
+                        {
+                            if (version > currentVersion || (version == currentVersion && alwaysApplyCurrentVersion))
+                            {
+                                var scripts = getScripts(tenant, version, assembly);
+                                scripts.ForEach(s => executeSql(s, connection));
+
+                                Logging.Log(Logging.LoggingLevel.Info, "Updating schema {0} version to {1}, executing {2} scripts", tenant, version, scripts.Count);
+                                updateSchemaVersion(tenant, version, connection, databaseSchemaForVersionTable);
+                            }
                         }
                     }
+                    //}
                 }
             }
         }
