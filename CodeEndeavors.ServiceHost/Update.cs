@@ -120,8 +120,15 @@ namespace CodeEndeavors.ServiceHost
 
         public static void ExtractZip(string fileName, string targetDirectory, string fileFilter = null, string directoryFilter = null, bool overwrite = true)
         {
-            var zip = new FastZip();
-            zip.ExtractZip(fileName, targetDirectory, overwrite ? FastZip.Overwrite.Always : FastZip.Overwrite.Never, null, fileFilter, directoryFilter, true);
+            try
+            {
+                var zip = new FastZip();
+                zip.ExtractZip(fileName, targetDirectory, overwrite ? FastZip.Overwrite.Always : FastZip.Overwrite.Never, null, fileFilter, directoryFilter, true);
+            }
+            catch (Exception ex)
+            {
+                Common.Services.Logging.Error(ex, "ExtractZip");
+            }
         }
 
         public static List<string> GetZipFileList(string fileName, Func<string, bool> where = null)
