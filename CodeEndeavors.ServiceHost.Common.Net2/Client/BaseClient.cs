@@ -44,8 +44,6 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             var mi = typeof(ServiceLocator).GetMethod("Register", new Type[] { typeof(string), typeof(int) });
             var method = mi.MakeGenericMethod(type);
             method.Invoke(null, new object[] { url, requestTimeout });
-
-            //ServiceLocator.Register<Client.PowerNETAccount>(url, requestTimeout);
         }
 
     }

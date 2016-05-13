@@ -17,12 +17,10 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public BaseClient(string httpServiceUrl, int requestTimeout, string restfulServerExtension)
         {
             Helpers.HandleAssemblyResolve();
-            //_service = new Http.PowerNETAccount(httpServiceUrl, requestTimeout, restfulServerExtension);
         }
         public BaseClient(string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, string authenticationType)
         {
             Helpers.HandleAssemblyResolve();
-            //_service = new Http.PowerNETAccount(httpServiceUrl, requestTimeout, restfulServerExtension, httpUser, httpPassword, authenticationType);
         }
 
         public abstract void SetAquireUserIdDelegate(Func<string> func);
