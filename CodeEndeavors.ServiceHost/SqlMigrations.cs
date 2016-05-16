@@ -26,7 +26,9 @@ namespace CodeEndeavors.ServiceHost
 
         public static void Migrate(string connection)
         {
-            Migrate(connection, false);
+            var assembly = Assembly.GetCallingAssembly();
+            Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
+            migrateSchema(assembly, connection, "dbo", false);
         }
 
         public static void Migrate(Dictionary<string, string> tenantConnections, bool alwaysApplyCurrentVersion)
@@ -45,7 +47,9 @@ namespace CodeEndeavors.ServiceHost
 
         public static void Migrate(string connection, string databaseSchemaForVersionTable)
         {
-            Migrate(connection, databaseSchemaForVersionTable, false);
+            var assembly = Assembly.GetCallingAssembly();
+            Logging.Log(Logging.LoggingLevel.Info, "SqlMigrations.Migrate: " + assembly.FullName);
+            migrateSchema(assembly, connection, databaseSchemaForVersionTable, false);
         }
         public static void Migrate(string connection, string databaseSchemaForVersionTable, bool alwaysApplyCurrentVersion)
         {
