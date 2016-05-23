@@ -165,7 +165,7 @@ namespace CodeEndeavors.ServiceHost
 
                         Logging.Log(Logging.LoggingLevel.Info, "Tenant {0} - current version:{1}  - max version:{2}", tenant, currentVersion, maxVersion);
 
-                        foreach (var version in versions)
+                        foreach (var version in versions.OrderBy(v => v))
                         {
                             if (version > currentVersion || (version == currentVersion && alwaysApplyCurrentVersion))
                             {
