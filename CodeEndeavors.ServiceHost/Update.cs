@@ -104,7 +104,7 @@ namespace CodeEndeavors.ServiceHost
                             extractDir = Path.Combine(extractDir, "bin");
 
                         Common.Services.Logging.Info("Applying update for file: {0}", packageFileName);
-                        ExtractZip(packageFileName, extractDir, @"-package\.manifest;-\.json;-\.config");   //don't overwrite config file if exists
+                        ExtractZip(packageFileName, extractDir, @"-package\.manifest;-\.config");   //don't overwrite config file if exists
                         ExtractZip(packageFileName, extractDir, @"\.config", overwrite: false); //if it doesn't exist, add config file
 
                         return true;
