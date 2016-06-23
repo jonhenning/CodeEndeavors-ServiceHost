@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text;
 namespace CodeEndeavors.ServiceHost.Common.Services
 {
+
     public class ServiceResult<T>
     {
         private T _data;
@@ -17,6 +18,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         private List<string> _errors;
         private List<string> _messages;
         private Stopwatch _watch;
+        private List<Func<ServiceResult<T>, Exception, bool>> _exceptionHandlers = new List<Func<ServiceResult<T>, Exception, bool>>();
+
         public T Data
         {
             get
@@ -35,6 +38,12 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                 return this._messages;
             }
         }
+
+        public List<Func<ServiceResult<T>, Exception, bool>> ExceptionHandlers
+        {
+            get { return _exceptionHandlers; }
+        }
+
         public List<string> Errors
         {
             get
@@ -71,6 +80,14 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public void AddException(Exception ex)
         {
             Logging.Error(ex.ToString());
+
+            //allow custom exception handlers
+            foreach (var handler in _exceptionHandlers)
+            {
+                if (handler(this, ex))  //if exception handled, we are done
+                    return;
+            }
+
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
                 this.Errors.Add(ex.ToString());
             else
