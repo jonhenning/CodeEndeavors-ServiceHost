@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace CodeEndeavors.ServiceHost
@@ -135,7 +136,8 @@ namespace CodeEndeavors.ServiceHost
             return names.SelectMany(n => 
             {
                 var text = Resources.GetText(n, assembly);
-                return text.Split(new[] { "GO" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                return Regex.Split(text, @"\n\s*GO\b", RegexOptions.IgnoreCase).ToList();
             }).ToList();
         }
 
