@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Newtonsoft.Json;
 namespace CodeEndeavors.ServiceHost.Common.Services
 {
 
@@ -39,6 +40,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             }
         }
 
+        [JsonIgnore]
         public List<Func<ServiceResult<T>, Exception, bool>> ExceptionHandlers
         {
             get { return _exceptionHandlers; }
