@@ -101,12 +101,18 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine(string.Format("Success: {0}   Time: {1}   Server Time: {2}", this.Success, this.ExecutionTime, this.ServerExecutionTime));
-            if (this.Errors.Count > 0)
+            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
             {
-                foreach (var error in this.Errors)
-                    sb.AppendLine(string.Format("ERROR: {0}", error));
+                sb.AppendLine(string.Format("Success: {0}   Time: {1}   Server Time: {2}", this.Success, this.ExecutionTime, this.ServerExecutionTime));
+                if (this.Errors.Count > 0)
+                {
+                    foreach (var error in this.Errors)
+                        sb.AppendLine(string.Format("ERROR: {0}", error));
+                }
             }
+            else
+                foreach (var error in this.Errors)
+                    sb.AppendLine(error);
             return sb.ToString();
         }
 
