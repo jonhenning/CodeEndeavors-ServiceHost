@@ -19,14 +19,14 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public static string RestfulServerExtension { get; set; }
         public static int DefaultHttpRequestTimeOut { get; set; }
 
-        public static T CreateService<T>(string serviceUrl, int httpTimeOut)
-        {
-            return CreateService<T>(serviceUrl, httpTimeOut);
-        }
-
         public static T CreateService<T>(string serviceUrl)
         {
             return CreateService<T>(serviceUrl, DefaultHttpRequestTimeOut);
+        }
+
+        public static T CreateService<T>(string serviceUrl, int httpTimeOut)
+        {
+            return CreateService<T>(serviceUrl, httpTimeOut, null, null, AuthenticationType.None);
         }
 
         public static T CreateService<T>(string serviceUrl, int httpTimeOut, string userName, string password, AuthenticationType authenticationType)
