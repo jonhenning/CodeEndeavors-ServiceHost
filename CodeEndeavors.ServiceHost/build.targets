@@ -8,7 +8,7 @@
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
-        <DeployDir></DeployDir>
+        <DeployDir>D:\dev\nnr.vnext\PowerNET.vNext\Services\everest\general.servicehost.com</DeployDir>
         <ProvisioningDir></ProvisioningDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
@@ -88,7 +88,7 @@
         
         <!--<Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
     </Target>
-    <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
+    <Target Name="DeployPackage">
         <!--<Unzip TargetDirectory="%(DeployDirs.FullPath)\bin" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
         <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" Condition="$(DeployDir) != ''"/>
         <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip;$(RedistDir)\$(ExternalClientName).Install.zip" DestinationFolder="%(ProvisioningDirs.FullPath)" Condition="$(ProvisioningDir) != ''" />
