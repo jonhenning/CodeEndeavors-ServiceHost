@@ -90,7 +90,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     return;
             }
 
-            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
+            if (Helpers.IsDebug)
                 this.Errors.Add(ex.ToString());
             else
                 this.Errors.Add(ex.Message);

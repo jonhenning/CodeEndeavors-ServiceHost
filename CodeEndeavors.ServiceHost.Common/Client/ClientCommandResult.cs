@@ -87,7 +87,14 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public void AddException(Exception ex)
         {
             Logger.Error(ex.ToString());
-            this.Errors.Add(ex.ToString());
+            if (Helpers.IsDebug)
+                this.Errors.Add(ex.ToString());
+            else
+            {
+                this.Errors.Add(ex.Message);
+                if (ex.InnerException != null)
+                    this.Errors.Add(ex.InnerException.Message);
+            }
         }
         public void StartTimer()
         {
@@ -101,7 +108,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public override string ToString()
         {
             var sb = new StringBuilder();
-            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled)
+            if (Helpers.IsDebug)
             {
                 sb.AppendLine(string.Format("Success: {0}   Time: {1}   Server Time: {2}", this.Success, this.ExecutionTime, this.ServerExecutionTime));
                 if (this.Errors.Count > 0)

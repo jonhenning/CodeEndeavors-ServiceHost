@@ -62,6 +62,16 @@ namespace CodeEndeavors.ServiceHost
         public void Application_Error(object sender, System.EventArgs e)
         {
             System.Exception lastError = System.Web.HttpContext.Current.Server.GetLastError();
+            if (lastError is System.Reflection.ReflectionTypeLoadException)
+            {
+                System.Reflection.ReflectionTypeLoadException ex = lastError as System.Reflection.ReflectionTypeLoadException;
+                var sb = new System.Text.StringBuilder();
+                foreach (var exception in ex.LoaderExceptions)
+                    sb.AppendLine(exception.Message);
+                sb.AppendLine(ex.Message);
+                Logging.Error(sb.ToString());
+            }
+
             Logging.Error(lastError.Message);
         }
         

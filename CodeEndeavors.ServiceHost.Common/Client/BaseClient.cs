@@ -42,7 +42,15 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             {
                 return clientCommandResult.Data;
             }
-            throw new Exception(clientCommandResult.ToString());
+            if (Helpers.IsDebug)
+                throw new Exception(clientCommandResult.ToString());
+            else
+            {
+                if (clientCommandResult.Errors.Count == 1)
+                    throw new Exception(clientCommandResult.Errors[0]);
+                else 
+                    throw new Exception(clientCommandResult.Errors.ToJson());
+            }
         }
 
 

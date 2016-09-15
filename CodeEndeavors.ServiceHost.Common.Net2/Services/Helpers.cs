@@ -39,5 +39,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
             return null;
         }
+
+        public static bool IsDebug
+        {
+            get { return System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.IsDebuggingEnabled; }
+        }
+
     }
 }
