@@ -8,7 +8,7 @@
     <PropertyGroup>
         <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
         <RedistDir>$(RootDir)\redist</RedistDir>
-        <DeployDir>D:\dev\nnr.vnext\PowerNET.vNext\Services\everest\general.servicehost.com</DeployDir>
+        <DeployDir>$(RootDir)\..\ServiceHost</DeployDir>
         <ProvisioningDir></ProvisioningDir>
         <CommonLibDir>$(RootDir)\lib</CommonLibDir>
     </PropertyGroup>
