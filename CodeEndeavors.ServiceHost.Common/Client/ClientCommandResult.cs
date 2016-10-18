@@ -60,6 +60,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.Data = result.Data;
             this.ServerExecutionTime = new TimeSpan(0, 0, 0, (int)Math.Round(result.ExecutionTime / 1000.0), (int)Math.Round(result.ExecutionTime % 1000.0));
             this.Errors.AddRange(result.Errors);
+            this.Messages.AddRange(result.Messages);
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
