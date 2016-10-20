@@ -35,7 +35,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             };
         }
 
-        public static T ExecuteClient<T>(Func<ClientCommandResult<T>> codeFunc) where T : new()
+        public static T ExecuteClient<T>(Func<ClientCommandResult<T>> codeFunc) //where T : new()
         {
             ClientCommandResult<T> clientCommandResult = codeFunc();
             if (clientCommandResult.Success)
