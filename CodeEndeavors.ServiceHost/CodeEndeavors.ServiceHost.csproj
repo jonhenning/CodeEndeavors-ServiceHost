@@ -54,6 +54,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\redist\CodeEndeavors.ServiceHost.Common.dll</HintPath>
     </Reference>
+    <Reference Include="CodeEndeavors.ServicePerformanceMonitor, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CodeEndeavors.ServicePerformanceMonitor.1.0.2\lib\4.5\CodeEndeavors.ServicePerformanceMonitor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
@@ -141,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\LoggingConfig.cs" />
+    <Compile Include="App_Start\PerformanceMonitorConfig.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />

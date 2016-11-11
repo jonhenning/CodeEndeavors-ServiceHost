@@ -59,6 +59,7 @@
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
+             $(TargetDir)CodeEndeavors.ServicePerformanceMonitor.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
         <Zip Files="
              $(TargetDir)CodeEndeavors.Extensions.dll;
@@ -80,6 +81,7 @@
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
+             $(TargetDir)CodeEndeavors.ServicePerformanceMonitor.dll;
              $(MSBuildProjectDirectory)\web.config;
              $(MSBuildProjectDirectory)\nlog.config;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />

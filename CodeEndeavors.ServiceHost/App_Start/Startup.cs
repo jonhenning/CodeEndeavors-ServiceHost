@@ -39,6 +39,7 @@ namespace CodeEndeavors.ServiceHost.App_Start
             }
 
             SwaggerConfig.Register(config);
+            PerformanceMonitorConfig.Register(config);
             WebApiConfig.Register(config);
             LoggingConfig.Register(config);
 
