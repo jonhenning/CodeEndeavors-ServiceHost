@@ -39,7 +39,9 @@ namespace CodeEndeavors.ServiceHost.App_Start
             }
 
             SwaggerConfig.Register(config);
-            PerformanceMonitorConfig.Register(config);
+
+            if (ConfigurationManager.AppSettings.GetSetting("PerformanceMonitor.Enabled", true))
+                PerformanceMonitorConfig.Register(config);
             WebApiConfig.Register(config);
             LoggingConfig.Register(config);
 

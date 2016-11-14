@@ -54,8 +54,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\redist\CodeEndeavors.ServiceHost.Common.dll</HintPath>
     </Reference>
-    <Reference Include="CodeEndeavors.ServicePerformanceMonitor, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CodeEndeavors.ServicePerformanceMonitor.1.0.2\lib\4.5\CodeEndeavors.ServicePerformanceMonitor.dll</HintPath>
+    <Reference Include="CodeEndeavors.ServicePerformanceMonitor, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CodeEndeavors.ServicePerformanceMonitor.1.0.3\lib\4.5\CodeEndeavors.ServicePerformanceMonitor.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">

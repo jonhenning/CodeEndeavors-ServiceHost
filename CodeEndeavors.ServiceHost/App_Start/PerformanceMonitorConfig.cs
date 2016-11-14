@@ -16,7 +16,7 @@ namespace CodeEndeavors.ServiceHost.App_Start
             config.EnableCodeEndeavorsServicePerformanceMonitor(c =>
                 {
                     c.SlowestRequestCount(10);
-                    c.Enable(ConfigurationManager.AppSettings.GetSetting("PerformanceMonitor.Enabled", false));
+                    c.Enable(ConfigurationManager.AppSettings.GetSetting("PerformanceMonitor.Active", false));
                 }).EnableUI();
 
         }
