@@ -132,7 +132,7 @@ namespace CodeEndeavors.ServiceHost
 
         private static List<string> getScripts(string tenant, int version, Assembly assembly)
         {
-            var names = Resources.GetNames(string.Format("schema.{0}.v{1}", tenant, version), assembly);
+            var names = Resources.GetNames(string.Format("schema.{0}.v{1}.", tenant, version), assembly);
 
             //move schema to head of list
             var schemaScriptIndex = names.FindIndex(n => n.EndsWith("schema.sql", StringComparison.InvariantCultureIgnoreCase));
