@@ -98,7 +98,7 @@ namespace CodeEndeavors.ServiceHost
             }
         }
 
-        private static void ensureSchema(Assembly assembly, SqlConnection connection, string databaseSchemaForVersionTable)
+        private static void ensureSchema(Assembly assembly, SqlConnection connection, string databaseSchemaForVersionTable, string tenant)
         {
             Logging.Log(Logging.LoggingLevel.Debug, "ensuring Schema for assembly: " + assembly.FullName);
 
@@ -109,11 +109,11 @@ namespace CodeEndeavors.ServiceHost
             executeSql(versionTable, connection);
 
             var tenants = getTenants(assembly);
-            foreach (var tenant in tenants)
-            {
+            //foreach (var tenant in tenants)
+            //{
                 var versionSeed = string.Format("if not exists(select 1 from [{0}].{1} WHERE tenant = '{2}') INSERT INTO [{0}].{1} (tenant, version) VALUES ('{2}', 0)", databaseSchemaForVersionTable, migrationTableName, tenant);
                 executeSql(versionSeed, connection);
-            }
+            //}
         }
 
         private static List<string> getTenants(Assembly assembly)
@@ -164,7 +164,7 @@ namespace CodeEndeavors.ServiceHost
                 {
                     connection.Open();
 
-                    ensureSchema(assembly, connection, databaseSchemaForVersionTable);
+                    ensureSchema(assembly, connection, databaseSchemaForVersionTable, tenantName);
 
                     var tenant = getTenants(assembly).Where(t => t == tenantName).FirstOrDefault();
                     if (tenant != null)
