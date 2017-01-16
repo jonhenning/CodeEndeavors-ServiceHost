@@ -125,7 +125,7 @@ namespace CodeEndeavors.ServiceHost
 
         private static List<int> getTenantVersions(string tenant, Assembly assembly)
         {
-            var names = Resources.GetNames("schema." + tenant, assembly);
+            var names = Resources.GetNames("schema." + tenant + ".", assembly);
             var len = ("schema." + tenant + ".").Length;
             return names.Select(n => n.Substring(len).Split('.')[0]).Distinct().Select(n => int.Parse(n.Substring(1))).ToList();
         }
