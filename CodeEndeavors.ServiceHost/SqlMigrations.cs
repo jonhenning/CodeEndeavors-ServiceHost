@@ -89,13 +89,17 @@ namespace CodeEndeavors.ServiceHost
 
         private static int executeSql(string sql, Dictionary<string, object> parameters, SqlConnection connection)
         {
-            using (var cmd = new SqlCommand(sql, connection))
+            if (!string.IsNullOrWhiteSpace(sql))
             {
-                if (parameters != null)
-                    parameters.Keys.ToList().ForEach(key => cmd.Parameters.AddWithValue(key, parameters[key]));
-                var ret = cmd.ExecuteNonQuery();
-                return ret;
+                using (var cmd = new SqlCommand(sql, connection))
+                {
+                    if (parameters != null)
+                        parameters.Keys.ToList().ForEach(key => cmd.Parameters.AddWithValue(key, parameters[key]));
+                    var ret = cmd.ExecuteNonQuery();
+                    return ret;
+                }
             }
+            return -1;
         }
 
         private static void ensureSchema(Assembly assembly, SqlConnection connection, string databaseSchemaForVersionTable, string tenant)
