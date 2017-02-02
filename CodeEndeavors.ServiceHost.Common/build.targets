@@ -7,6 +7,7 @@
         <ProgramFiles32 Condition="Exists('$(PROGRAMFILES) (x86)')">$(PROGRAMFILES) (x86)</ProgramFiles32>
         <ProgramFiles32 Condition="$(ProgramFiles32) == ''">$(PROGRAMFILES)</ProgramFiles32>
         <ILMergeTargetPlatform>/targetplatform:v4,"$(PROGRAMFILES)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"</ILMergeTargetPlatform>
+      <DeployDll></DeployDll>
       <DeployDir></DeployDir>
     </PropertyGroup>
     
@@ -41,7 +42,7 @@
     <Target Name="CreateSetupPackage" DependsOnTargets="CleanRedistDir">
         <Zip Files="$(RedistDir)\$(ProjectFullName).dll;" WorkingDirectory="$(RedistDir)\" ZipFileName="$(RedistDir)\$(ProjectFullName).zip" />
     </Target>
-    <Target Name="DeployPackage" Condition="$(DeployDir) != ''">
+    <Target Name="DeployPackage" Condition="$(DeployDll) == '1'">
         <MakeDir Directories="$(DeployDir)\bin" />
         <Copy SourceFiles="$(RedistDir)\$(ProjectFullName).dll" DestinationFolder="$(DeployDir)\bin" SkipUnchangedFiles="false" />
     </Target>
