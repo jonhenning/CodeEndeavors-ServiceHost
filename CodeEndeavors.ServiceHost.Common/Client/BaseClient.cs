@@ -1,6 +1,7 @@
 ﻿using CodeEndeavors.Extensions;
 using CodeEndeavors.ServiceHost.Common.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Logger = CodeEndeavors.ServiceHost.Common.Services.Logging;
 
@@ -33,6 +34,22 @@ namespace CodeEndeavors.ServiceHost.Common.Client
                 if (onLoggingMessage != null)
                     onLoggingMessage(level.ToString(), message);
             };
+        }
+
+        //allows for simple way to determine if a logging implementation has already been registered
+        private ConcurrentDictionary<string, string> _loggingImplementationKeys = new ConcurrentDictionary<string, string>();
+        public void ConfigureLogging(string implementationKey,string logLevel, Action<string, string> onLoggingMessage)
+        {
+            Logger.LogLevel = logLevel.ToType<Logger.LoggingLevel>();
+            if (!_loggingImplementationKeys.ContainsKey(implementationKey))
+            {
+                Logger.OnLoggingMessage += (Logger.LoggingLevel level, string message) =>
+                {
+                    if (onLoggingMessage != null)
+                        onLoggingMessage(level.ToString(), message);
+                };
+                _loggingImplementationKeys[implementationKey] = logLevel;
+            }
         }
 
         public static T ExecuteClient<T>(Func<ClientCommandResult<T>> codeFunc) //where T : new()
