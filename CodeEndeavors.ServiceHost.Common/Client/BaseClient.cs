@@ -37,7 +37,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         }
 
         //allows for simple way to determine if a logging implementation has already been registered
-        private ConcurrentDictionary<string, string> _loggingImplementationKeys = new ConcurrentDictionary<string, string>();
+        private static ConcurrentDictionary<string, string> _loggingImplementationKeys = new ConcurrentDictionary<string, string>();
         public void ConfigureLogging(string implementationKey,string logLevel, Action<string, string> onLoggingMessage)
         {
             Logger.LogLevel = logLevel.ToType<Logger.LoggingLevel>();
