@@ -91,12 +91,21 @@ namespace CodeEndeavors.ServiceHost
         {
             if (!string.IsNullOrWhiteSpace(sql))
             {
-                using (var cmd = new SqlCommand(sql, connection))
+                try
                 {
-                    if (parameters != null)
-                        parameters.Keys.ToList().ForEach(key => cmd.Parameters.AddWithValue(key, parameters[key]));
-                    var ret = cmd.ExecuteNonQuery();
-                    return ret;
+                    using (var cmd = new SqlCommand(sql, connection))
+                    {
+                        if (parameters != null)
+                            parameters.Keys.ToList().ForEach(key => cmd.Parameters.AddWithValue(key, parameters[key]));
+                        var ret = cmd.ExecuteNonQuery();
+                        return ret;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log(Logging.LoggingLevel.Debug, "executeSql: " + sql);
+                    Logging.Error(ex);
+                    throw ex;
                 }
             }
             return -1;
