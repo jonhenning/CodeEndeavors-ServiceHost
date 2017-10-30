@@ -112,7 +112,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                 var json = this.Data.ToJson(false, null, true);
                 if (json.Length > 255)
                     json = json.Substring(0, 255);
-                sb.AppendLine("Data: " + json);
+                if (json.ToLower().IndexOf("password") == -1)
+                    sb.AppendLine("Data: " + json);
+                else
+                    sb.AppendLine(string.Format("Data: {0} ", "[NOT LOGGING PASSWORDS]"));
             }
             return sb.ToString();
         }
