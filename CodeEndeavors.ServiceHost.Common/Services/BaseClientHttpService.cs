@@ -169,7 +169,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     responseTask = request.PostAsync("", byteContent);
                 }
 
-                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Request: {0}", url);
+                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
 
                 var response = responseTask.Result;
 
@@ -187,6 +187,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             }
             return responseText;
         }
+
     }
 }
 

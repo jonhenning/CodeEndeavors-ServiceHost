@@ -173,6 +173,17 @@ namespace CodeEndeavors.ServiceHost.Extensions
             }
             return sb.ToString();
         }
+
+        public static string GetLogRequest(this byte[] body)
+        {
+            var s = System.Text.Encoding.UTF8.GetString(body);
+            if (s.Length > 1000)
+                s = s.Substring(0, 1000);
+            if (s.IndexOf("password", StringComparison.InvariantCultureIgnoreCase) > -1)
+                s = "[NOT LOGGING PASSWORDS]";
+            return s;
+        }
+
         public static string GetLogResponse(this string url, Exception ex)
         {
             var sb = new StringBuilder();
