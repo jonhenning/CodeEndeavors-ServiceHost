@@ -43,7 +43,6 @@
              $(TargetDir)$(ExternalClientName).pdb;
              $(TargetDir)CodeEndeavors.ServiceHost.Common.dll;
              $(TargetDir)CodeEndeavors.ServiceHost.Common.pdb;
-             $(TargetDir)Swashbuckle.Core.dll;
              $(TargetDir)System.Web.Http.dll;
              $(TargetDir)System.Web.Http.Owin.dll;
              $(TargetDir)System.Web.Http.WebHost.dll;
@@ -59,13 +58,11 @@
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
-             $(TargetDir)CodeEndeavors.ServicePerformanceMonitor.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
         <Zip Files="
              $(TargetDir)CodeEndeavors.Extensions.dll;
              $(TargetDir)$(ExternalClientName).dll;
              $(TargetDir)CodeEndeavors.ServiceHost.Common.dll;
-             $(TargetDir)Swashbuckle.Core.dll;
              $(TargetDir)System.Web.Http.dll;
              $(TargetDir)System.Web.Http.Owin.dll;
              $(TargetDir)System.Web.Http.WebHost.dll;
@@ -81,7 +78,6 @@
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
-             $(TargetDir)CodeEndeavors.ServicePerformanceMonitor.dll;
              $(MSBuildProjectDirectory)\web.config;
              $(MSBuildProjectDirectory)\nlog.config;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).Install.zip" />

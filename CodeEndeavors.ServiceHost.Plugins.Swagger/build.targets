@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- PLEASE NOTE THAT CHANGES TO THIS FILE WILL NOT TAKE AFFECT UNTIL YOU UNLOAD AND RELOAD YOUR PROJECT! -->
+    <PropertyGroup>
+        <ExternalClientName>CodeEndeavors.ServiceHost.Plugins.Swagger</ExternalClientName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <RootDir>$(MSBuildProjectDirectory)\..</RootDir>
+        <RedistDir>$(RootDir)\redist</RedistDir>
+        <DeployDir>$(RootDir)\..\ServiceHost</DeployDir>
+        <ProvisioningDir></ProvisioningDir>
+        <CommonLibDir>$(RootDir)\lib</CommonLibDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <DeployDirs Include="$(DeployDir)" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProvisioningDirs Include="$(ProvisioningDir)" />
+    </ItemGroup>
+
+    <Import Project="$(CommonLibDir)\MSBuildTargets\MSBuild.Community.Tasks.Targets"/>
+
+    <Target Name="AfterBuild">
+        <CallTarget Targets="CreateSetupPackage" />
+        <CallTarget Targets="DeployPackage" />
+    </Target>
+
+    <Target Name="CleanRedistDir">
+        <MakeDir Directories="$(RedistDir)"/>
+
+        <CreateItem Include="$(RedistDir)\$(ExternalClientName).zip;$(RedistDir)\$(ExternalClientName).dll;">
+            <Output TaskParameter="Include" ItemName="ExistingSetups" />
+        </CreateItem>
+        <Delete Files="@(ExistingSetups)" TreatErrorsAsWarnings="true" />
+    </Target>
+
+    <Target Name="CreateSetupPackage" DependsOnTargets="CleanRedistDir">
+        <Zip Files="
+             $(TargetDir)$(ExternalClientName).dll;
+             $(TargetDir)$(ExternalClientName).pdb;
+             $(TargetDir)$(ExternalClientName).dll.config;
+             $(TargetDir)Swashbuckle.Core.dll;
+             $(TargetDir)WebActivatorEx.dll;
+             " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
+        <Copy SourceFiles="$(TargetDir)$(ExternalClientName).dll;" DestinationFolder="$(RedistDir)" />
+        
+        <!--<Unzip TargetDirectory="$(RedistDir)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />-->
+    </Target>
+    <Target Name="DeployPackage">
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" Condition="$(DeployDir) != ''"/>
+    </Target>
+
+</Project>

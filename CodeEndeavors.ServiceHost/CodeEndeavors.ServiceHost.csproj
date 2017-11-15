@@ -54,10 +54,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\redist\CodeEndeavors.ServiceHost.Common.dll</HintPath>
     </Reference>
-    <Reference Include="CodeEndeavors.ServicePerformanceMonitor, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CodeEndeavors.ServicePerformanceMonitor.1.0.3\lib\4.5\CodeEndeavors.ServicePerformanceMonitor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
@@ -103,10 +99,6 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
-      <HintPath>..\packages\Swashbuckle.Core.5.2.2\lib\net40\Swashbuckle.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -138,17 +130,10 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml.Serialization" />
-    <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
-      <HintPath>..\packages\WebActivatorEx.2.0.6\lib\net40\WebActivatorEx.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\LoggingConfig.cs" />
-    <Compile Include="App_Start\PerformanceMonitorConfig.cs" />
     <Compile Include="App_Start\Startup.cs" />
-    <Compile Include="App_Start\SwaggerConfig.cs" />
-    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="BasePlugin.cs" />
     <Compile Include="BaseService.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="Controllers\IdentityController.cs" />
@@ -161,6 +146,16 @@
     <Compile Include="Middleware\InstallerMiddleware.cs" />
     <Compile Include="Middleware\LoggingMiddleware.cs" />
     <Compile Include="Middleware\UserContextHandler.cs" />
+    <Compile Include="Plugins\HttpLoggingExtension.cs" />
+    <Compile Include="Plugins\UserContextExtension.cs" />
+    <Compile Include="Plugins\RoutesExtension.cs" />
+    <Compile Include="Plugins\InstallerExtension.cs" />
+    <Compile Include="Plugins\ExceptionExtension.cs" />
+    <Compile Include="Plugins\CompressionExtension.cs" />
+    <Compile Include="Plugins\LoggingExtension.cs" />
+    <Compile Include="Plugins\AuthenticationExtension.cs" />
+    <Compile Include="Plugins\WebApiExtension.cs" />
+    <Compile Include="Plugins\IServiceHostPlugin.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="SqlMigrations.cs" />
     <Compile Include="Models\ViewClaim.cs" />
@@ -170,7 +165,6 @@
     <Compile Include="Update.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\RouteConfig.cs" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
