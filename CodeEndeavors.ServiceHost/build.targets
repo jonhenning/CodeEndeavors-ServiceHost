@@ -47,6 +47,7 @@
              $(TargetDir)System.Web.Http.Owin.dll;
              $(TargetDir)System.Web.Http.WebHost.dll;
              $(TargetDir)System.Net.Http.Formatting.dll;
+             $(TargetDir)Microsoft.Web.Infrastructure.dll;
              $(TargetDir)Microsoft.Owin.dll;
              $(TargetDir)Microsoft.Owin.Host.SystemWeb.dll;
              $(TargetDir)Microsoft.Owin.Security.Cookies.dll;
@@ -67,6 +68,7 @@
              $(TargetDir)System.Web.Http.Owin.dll;
              $(TargetDir)System.Web.Http.WebHost.dll;
              $(TargetDir)System.Net.Http.Formatting.dll;
+             $(TargetDir)Microsoft.Web.Infrastructure.dll;
              $(TargetDir)Microsoft.Owin.dll;
              $(TargetDir)Microsoft.Owin.Host.SystemWeb.dll;
              $(TargetDir)Microsoft.Owin.Security.Cookies.dll;

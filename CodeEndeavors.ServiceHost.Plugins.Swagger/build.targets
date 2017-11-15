@@ -43,7 +43,6 @@
              $(TargetDir)$(ExternalClientName).dll.config;
              $(TargetDir)Swashbuckle.Core.dll;
              $(TargetDir)WebActivatorEx.dll;
-             $(TargetDir)Microsoft.Web.Infrastructure.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
         <Copy SourceFiles="$(TargetDir)$(ExternalClientName).dll;" DestinationFolder="$(RedistDir)" />
         
