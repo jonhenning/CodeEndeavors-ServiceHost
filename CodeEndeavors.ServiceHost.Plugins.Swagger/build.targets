@@ -50,6 +50,7 @@
     </Target>
     <Target Name="DeployPackage">
         <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(DeployDirs.FullPath)\_updates" Condition="$(DeployDir) != ''"/>
+        <Copy SourceFiles="$(RedistDir)\$(ExternalClientName).zip" DestinationFolder="%(ProvisioningDirs.FullPath)" Condition="$(ProvisioningDir) != ''" />
     </Target>
 
 </Project>
