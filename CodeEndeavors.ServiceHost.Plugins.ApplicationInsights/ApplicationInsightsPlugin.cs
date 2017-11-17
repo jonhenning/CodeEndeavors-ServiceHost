@@ -18,8 +18,9 @@ namespace CodeEndeavors.ServiceHost.Plugins.ApplicationInsights
             if (this.GetConfigSetting("ApplicationInsights.Enabled", true) && !string.IsNullOrEmpty(this.GetConfigSetting("ApplicationInsights.InstrumentationKey", "")))
             {
                 TelemetryConfiguration.Active.InstrumentationKey = this.GetConfigSetting("ApplicationInsights.InstrumentationKey", "");
-                config.EnableSystemDiagnosticsTracing();
-                //GlobalFilters.Filters.Clear();
+                if (this.GetConfigSetting("ApplicationInsights.DiagnosticsTracing", false))
+                    config.EnableSystemDiagnosticsTracing();
+                GlobalFilters.Filters.Clear();
                 GlobalFilters.Filters.Add(new AiHandleErrorAttribute());
             }
         }
