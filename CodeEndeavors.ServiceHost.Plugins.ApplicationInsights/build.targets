@@ -55,6 +55,10 @@
              $(TargetDir)System.Web.Http.Tracing.dll;
              $(TargetDir)System.Diagnostics.DiagnosticSource.dll;
              $(TargetDir)ApplicationInsights.OwinExtensions.dll;
+             $(TargetDir)System.Web.WebPages.dll;
+             $(TargetDir)System.Web.WebPages.Deployment.dll;
+             $(TargetDir)System.Web.WebPages.Razor.dll;
+             $(TargetDir)System.Web.Mvc.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
         <Copy SourceFiles="$(TargetDir)$(ExternalClientName).dll;" DestinationFolder="$(RedistDir)" />
         
