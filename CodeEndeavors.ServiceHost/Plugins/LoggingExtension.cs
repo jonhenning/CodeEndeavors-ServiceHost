@@ -13,7 +13,7 @@ namespace CodeEndeavors.ServiceHost.Plugins
 
         public int? Priority
         {
-            get { return 100; }
+            get { return 10; }
         }
 
         public void Configure(IAppBuilder app, HttpConfiguration config)
