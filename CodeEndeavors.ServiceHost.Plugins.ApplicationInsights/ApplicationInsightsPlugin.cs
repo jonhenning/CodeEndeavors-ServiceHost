@@ -3,6 +3,7 @@ using Owin;
 using System.Web.Http;
 using System.Web.Mvc;
 using Microsoft.ApplicationInsights.Extensibility.Implementation.Tracing;
+using Microsoft.ApplicationInsights;
 
 namespace CodeEndeavors.ServiceHost.Plugins.ApplicationInsights
 {
@@ -23,6 +24,8 @@ namespace CodeEndeavors.ServiceHost.Plugins.ApplicationInsights
                     config.EnableSystemDiagnosticsTracing();
                 GlobalFilters.Filters.Clear();
                 GlobalFilters.Filters.Add(new AiHandleErrorAttribute());
+
+                new TelemetryClient().TrackEvent("Application Insights Started from: " + System.Environment.MachineName);
             }
             else
                 ServiceHost.Common.Services.Logging.Info("ApplicationInsights NOT Configured");
