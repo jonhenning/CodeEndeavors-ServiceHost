@@ -80,7 +80,16 @@ namespace CodeEndeavors.ServiceHost
             var count = 0;
             var files = dir.GetFiles("*.zip");
             foreach (var file in files)
-                count += InstallFile(file.FullName) ? 1 : 0;
+            {
+                try
+                {
+                    count += InstallFile(file.FullName) ? 1 : 0;
+                }
+                catch (Exception ex)
+                {
+                    Common.Services.Logging.Error(ex);
+                }
+            }
         }
 
         public static bool InstallFile(string fileName, string portalId = null)
@@ -93,7 +102,6 @@ namespace CodeEndeavors.ServiceHost
                     {
                         var packageFileName = Path.Combine(PackageDir, new FileInfo(fileName).Name);
                         File.Copy(fileName, packageFileName, true);
-                        File.Delete(fileName);
                         //if (File.Exists(packageFileName))
                         //    File.Delete(packageFileName);
                         //File.Move(fileName, packageFileName);
@@ -106,6 +114,8 @@ namespace CodeEndeavors.ServiceHost
                         Common.Services.Logging.Info("Applying update for file: {0}", packageFileName);
                         ExtractZip(packageFileName, extractDir, @"-package\.manifest;-\.config");   //don't overwrite config file if exists
                         ExtractZip(packageFileName, extractDir, @"\.config", overwrite: false); //if it doesn't exist, add config file
+
+                        File.Delete(fileName);
 
                         return true;
                     }
