@@ -41,14 +41,15 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public void ConfigureLogging(string implementationKey,string logLevel, Action<string, string> onLoggingMessage)
         {
             Logger.LogLevel = logLevel.ToType<Logger.LoggingLevel>();
-            if (!_loggingImplementationKeys.ContainsKey(implementationKey))
+            //if (!_loggingImplementationKeys.ContainsKey(implementationKey))
+            if (_loggingImplementationKeys.TryAdd(implementationKey, logLevel))
             {
                 Logger.OnLoggingMessage += (Logger.LoggingLevel level, string message) =>
                 {
                     if (onLoggingMessage != null)
                         onLoggingMessage(level.ToString(), message);
                 };
-                _loggingImplementationKeys[implementationKey] = logLevel;
+                //_loggingImplementationKeys[implementationKey] = logLevel;
             }
         }
 
