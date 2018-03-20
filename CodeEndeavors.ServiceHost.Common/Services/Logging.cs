@@ -59,10 +59,14 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public static void Error(Exception ex)
         {
             Error("ERROR: {0}", ex.Message);
+            if (ex.InnerException != null)
+                Error(ex.InnerException);
         }
         public static void Error(Exception ex, string msg)
         {
             Error("ERROR: {0}:{1}", msg, ex.Message);
+            if (ex.InnerException != null)
+                Error(ex.InnerException, msg);
         }
 
         public static void Error(string msg)
