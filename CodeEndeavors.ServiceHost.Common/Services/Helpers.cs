@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,14 +32,23 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
+        private static ConcurrentDictionary<string, System.Reflection.Assembly> _resolvedNames = new ConcurrentDictionary<string, System.Reflection.Assembly>();
         public static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, System.ResolveEventArgs args)
         {
             var name = new System.Reflection.AssemblyName(args.Name);
 
             if (name.Name != args.Name)
-                return System.Reflection.Assembly.LoadWithPartialName(name.Name);
-
-            return null;
+            {
+                if (!_resolvedNames.ContainsKey(name.Name))
+                {
+                    Logging.Info("CurrentDomain_AssemblyResolve: {0} != {1}", name.Name, args.Name);
+                    _resolvedNames[name.Name] = System.Reflection.Assembly.LoadWithPartialName(name.Name);
+                }
+                else
+                    Logging.Info("CurrentDomain_AssemblyResolve (cached): {0} != {1}", name.Name, args.Name);
+                return _resolvedNames[name.Name];
+            }
+            return null;    //should never happen
         }
 
         public static bool IsDebug
