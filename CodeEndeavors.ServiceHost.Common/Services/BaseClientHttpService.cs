@@ -138,6 +138,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             try
             {
                 HttpClient request = null;
+                var timer = new System.Diagnostics.Stopwatch();
+                timer.Start();
 
                 var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
 
@@ -169,16 +171,21 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     responseTask = request.PostAsync("", byteContent);
                 }
 
-                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
+                if (Logging.IsDebugEnabled)
+                    Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
 
                 var response = responseTask.Result;
 
                 responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
 
-                Logging.Log(Logging.LoggingLevel.Info, "GetHttp Response: {0}", response.StatusCode);
                 if (Logging.IsDebugEnabled)
+                {
+                    //Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Response: {0}", response.StatusCode);
                     Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
+                }
 
+                if (timer.ElapsedMilliseconds > 700)
+                    Logging.Log(Logging.LoggingLevel.Info, "LONG RUNNING REQUEST: {0}ms {1} \r\n{2}", timer.ElapsedMilliseconds, url, body != null ? body.GetLogRequest() : "");
             }
             catch (Exception ex)
             {
