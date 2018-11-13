@@ -22,20 +22,20 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             return userId;
         }
 
-        public static void ProcessBasicAuthentication(HttpClient request, string user, string password, ref string token)
+        public static void ProcessBasicAuthentication(HttpRequestMessage request, string user, string password, ref string token)
         {
-            request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.Default.GetBytes(user + ":" + password))); 
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.Default.GetBytes(user + ":" + password))); 
         }
 
-        public static void ProcessOAuth(HttpClient request, string user, string password, ref string token)
+        public static void ProcessOAuth(HttpRequestMessage request, string user, string password, ref string token)
         {
             if (string.IsNullOrEmpty(token))
             {
-                var url = request.BaseAddress.Scheme + "://" + request.BaseAddress.Host + "/token";
+                var url = request.RequestUri.Scheme + "://" + request.RequestUri.Host + "/token";
                 var client = new OAuth2Client(new Uri(url));
                 token = client.RequestResourceOwnerPasswordAsync(user, password).Result.AccessToken;
             }
-            request.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
     }

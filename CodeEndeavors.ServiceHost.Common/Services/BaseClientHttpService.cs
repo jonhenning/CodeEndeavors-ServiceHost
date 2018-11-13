@@ -20,7 +20,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 	public class BaseClientHttpService
 	{
 		//public delegate string AquireUserId();
-        public delegate void ProcessAuthenticationHandler(HttpClient request, string user, string password, ref string token);
+        public delegate void ProcessAuthenticationHandler(HttpRequestMessage request, string user, string password, ref string token);
 		public int HttpRequestTimeout;
 		public string HttpServiceUrl;
 		public string RestfulServerExtension;
@@ -28,12 +28,40 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public string HttpUser;
 		public string HttpPassword;
         private string _token;
+        [Obsolete]
         public HttpClientHandler HttpClientHandler;
 		
         private string _controllerName;
 		private CookieContainer _cookieJar;
 
         private BaseClientHttpService.ProcessAuthenticationHandler _processAuthenticationHandler;
+
+        private static HttpClient _httpClient;
+        private static object syncRoot = new object();
+
+        private static HttpClient httpClient
+        {
+            get
+            {
+                if (_httpClient == null)
+                {
+                    lock (syncRoot)
+                    {
+                        if (_httpClient == null)
+                        {
+                            Logging.Info("Initializing HttpClient");
+                            ServicePointManager.UseNagleAlgorithm = false;
+                            ServicePointManager.Expect100Continue = false;
+                            ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+                            var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+                            _httpClient = new HttpClient(compressionHandler);
+                        }
+                    }
+                }
+                return _httpClient;
+            }
+        }
+
         public BaseClientHttpService.ProcessAuthenticationHandler ProcessAuthentication
         {
             get  { return _processAuthenticationHandler; }
@@ -73,6 +101,10 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         {
             return this.GetHttpRequestObject<T>(url, null);
         }
+        public async Task<T> GetHttpRequestObjectAsync<T>(string url)
+        {
+            return this.GetHttpRequestObject<T>(url, null);
+        }
 
         public T GetHttpRequestObject<T>(string url, object body)
         {
@@ -87,7 +119,20 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             return jsonResponse.ToObject<T>();
         }
 
-		public string RequestUrl(string method)
+        public async Task<T> GetHttpRequestObjectAsync<T>(string url, object body)
+        {
+            var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
+            var jsonResponse = await this.getResponseAsync(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json");
+
+            if (jsonResponse.StartsWith("{\"Message\":\""))
+            {
+                var errorDict = jsonResponse.ToObject<Dictionary<string, object>>();
+                throw new Exception(errorDict.ToJson());
+            }
+            return jsonResponse.ToObject<T>();
+        }
+
+        public string RequestUrl(string method)
 		{
 			return this.RequestUrl(method, "");
 		}
@@ -129,63 +174,52 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         }
         private string getResponse(string url, string body, int timeOut, Encoding encoding, string contentType)
         {
-            return this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, false);
+            return this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, false).Result;
         }
 
-        private string getResponse(string url, byte[] body, int timeOut, string contentType, bool triedAuthAlready)
+        private async Task<string> getResponseAsync(string url, string body, int timeOut, Encoding encoding, string contentType)
+        {
+            return await this.getResponse(url, string.IsNullOrEmpty(body) ? null : encoding.GetBytes(body), timeOut, contentType, false);
+        }
+
+        private async Task<string> getResponse(string url, byte[] body, int timeOut, string contentType, bool triedAuthAlready)
         {
             string responseText = "";
             try
             {
-                HttpClient request = null;
-                var timer = new System.Diagnostics.Stopwatch();
-                timer.Start();
-
-                var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
-
-                if (HttpClientHandler == null)
-                    request = new HttpClient(compressionHandler) { BaseAddress = new Uri(url) };
-                else
-                    request = new HttpClient(HttpClientHandler) { BaseAddress = new Uri(url) };
-
-                if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
-                    this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
-                else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
-                    this.ProcessAuthentication = Handlers.ProcessOAuth;
-
-                if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
-                    this.ProcessAuthentication(request, HttpUser, HttpPassword, ref _token);
-
-                if (timeOut > 0)
-                    request.Timeout = new TimeSpan(0, 0, 0, 0, timeOut);
-
-
-                Task<HttpResponseMessage> responseTask = null;
-                if (body == null)
-                    responseTask = request.GetAsync("");
-                else
+                using (var requestMessage = createHttpRequestMessage(url, body, contentType))
                 {
-                    var byteContent = new ByteArrayContent(body);
-                    if (!string.IsNullOrEmpty(contentType))
-                        byteContent.Headers.Add("Content-Type", contentType);
-                    responseTask = request.PostAsync("", byteContent);
+                    var timer = new System.Diagnostics.Stopwatch();
+                    timer.Start();
+
+                    if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
+                        this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
+                    else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
+                        this.ProcessAuthentication = Handlers.ProcessOAuth;
+
+                    if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
+                        this.ProcessAuthentication(requestMessage, HttpUser, HttpPassword, ref _token);
+
+                    if (timeOut > 0)
+                        ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLeaseTimeout = timeOut;    //todo: overhead?
+
+                    if (Logging.IsDebugEnabled)
+                        Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
+                    using (var response = await httpClient.SendAsync(requestMessage).ConfigureAwait(false))
+                    {
+
+                        responseText = await response.Content.ReadAsStringAsync(); //CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
+
+                        if (Logging.IsDebugEnabled)
+                        {
+                            //Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Response: {0}", response.StatusCode);
+                            Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
+                        }
+
+                        if (timer.ElapsedMilliseconds > 700)
+                            Logging.Log(Logging.LoggingLevel.Info, "LONG RUNNING REQUEST: {0}ms {1} \r\n{2}", timer.ElapsedMilliseconds, url, body != null ? body.GetLogRequest() : "");
+                    }
                 }
-
-                if (Logging.IsDebugEnabled)
-                    Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
-
-                var response = responseTask.Result;
-
-                responseText = CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
-
-                if (Logging.IsDebugEnabled)
-                {
-                    //Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Response: {0}", response.StatusCode);
-                    Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
-                }
-
-                if (timer.ElapsedMilliseconds > 700)
-                    Logging.Log(Logging.LoggingLevel.Info, "LONG RUNNING REQUEST: {0}ms {1} \r\n{2}", timer.ElapsedMilliseconds, url, body != null ? body.GetLogRequest() : "");
             }
             catch (Exception ex)
             {
@@ -193,6 +227,26 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                 throw new Exception(url.GetLogResponse(ex));
             }
             return responseText;
+        }
+
+        private static HttpRequestMessage createHttpRequestMessage(string apiUrl, byte[] body, string contentType)
+        {
+            var method = body == null ? HttpMethod.Get : HttpMethod.Post;
+            var request = new HttpRequestMessage()
+            {
+                Method = method,
+                RequestUri = new Uri(apiUrl),
+            };
+
+            if (body != null)
+            {
+                var byteContent = new ByteArrayContent(body);
+                if (!string.IsNullOrEmpty(contentType))
+                    byteContent.Headers.Add("Content-Type", contentType);
+                request.Content = byteContent;
+            }
+
+            return request;
         }
 
     }
