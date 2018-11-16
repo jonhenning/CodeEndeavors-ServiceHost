@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using Logger = CodeEndeavors.ServiceHost.Common.Services.Logging;
 
 namespace CodeEndeavors.ServiceHost.Common.Client
@@ -144,10 +145,38 @@ namespace CodeEndeavors.ServiceHost.Common.Client
 
         public static ClientCommandResult<TData> Execute(Func<ServiceResult<TData>> codeFunc)
         {
-            return ClientCommandResult<TData>.Execute(result =>
+            return Execute(result =>
             {
                 result.ReportResult(codeFunc.Invoke(), true);
             });
         }
+
+        public static async Task<ClientCommandResult<TData>> ExecuteAsync(Func<ClientCommandResult<TData>, Task> codeFunc)
+        {
+            var result = new ClientCommandResult<TData>(true);
+            try
+            {
+                await codeFunc.Invoke(result);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            finally
+            {
+                result.StopTimer();
+            }
+            return result;
+        }
+
+        public static async Task<ClientCommandResult<TData>> ExecuteAsync(Func<Task<ServiceResult<TData>>> codeFunc)
+        {
+            return await ExecuteAsync(async result =>
+            {
+                var ret = await codeFunc.Invoke();
+                result.ReportResult(ret, true);
+            });
+        }
+
     }
 }
