@@ -3,6 +3,7 @@ using CodeEndeavors.ServiceHost.Common.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Logger = CodeEndeavors.ServiceHost.Common.Services.Logging;
 
 namespace CodeEndeavors.ServiceHost.Common.Client
@@ -67,6 +68,24 @@ namespace CodeEndeavors.ServiceHost.Common.Client
                 if (clientCommandResult.Errors.Count == 1)
                     throw new Exception(clientCommandResult.Errors[0]);
                 else 
+                    throw new Exception(clientCommandResult.Errors.ToJson());
+            }
+        }
+
+        public async static Task<T> ExecuteClientAsync<T>(Func<Task<ClientCommandResult<T>>> codeFunc) //where T : new()
+        {
+            ClientCommandResult<T> clientCommandResult = await codeFunc();
+            if (clientCommandResult.Success)
+            {
+                return clientCommandResult.Data;
+            }
+            if (Helpers.IsDebug)
+                throw new Exception(clientCommandResult.ToString());
+            else
+            {
+                if (clientCommandResult.Errors.Count == 1)
+                    throw new Exception(clientCommandResult.Errors[0]);
+                else
                     throw new Exception(clientCommandResult.Errors.ToJson());
             }
         }
