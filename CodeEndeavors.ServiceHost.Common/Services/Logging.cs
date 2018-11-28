@@ -53,7 +53,13 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public static void Log(LoggingLevel level, string msg, params object[] args)
         {
             if ((int)level <= (int)LogLevel && OnLoggingMessage != null)
-                OnLoggingMessage(level, (msg.IndexOf("{0}") > -1 ? string.Format(msg, args) : msg));
+            {
+                try
+                {
+                    OnLoggingMessage(level, (msg.IndexOf("{0}") > -1 ? string.Format(msg, args) : msg));
+                }
+                catch { }
+            }
         }
 
         public static void Error(Exception ex)
