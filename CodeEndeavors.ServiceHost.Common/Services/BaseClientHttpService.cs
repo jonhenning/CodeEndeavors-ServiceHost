@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CodeEndeavors.ServiceHost.Common.Services
@@ -17,22 +18,22 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         Custom
     }
 
-	public class BaseClientHttpService
-	{
-		//public delegate string AquireUserId();
+    public class BaseClientHttpService
+    {
+        //public delegate string AquireUserId();
         public delegate void ProcessAuthenticationHandler(HttpRequestMessage request, string user, string password, ref string token);
-		public int HttpRequestTimeout;
-		public string HttpServiceUrl;
-		public string RestfulServerExtension;
+        public int HttpRequestTimeout;
+        public string HttpServiceUrl;
+        public string RestfulServerExtension;
         public AuthenticationType AuthenticationType;
         public string HttpUser;
-		public string HttpPassword;
+        public string HttpPassword;
         private string _token;
         [Obsolete]
         public HttpClientHandler HttpClientHandler;
-		
+
         private string _controllerName;
-		private CookieContainer _cookieJar;
+        private CookieContainer _cookieJar;
 
         private BaseClientHttpService.ProcessAuthenticationHandler _processAuthenticationHandler;
 
@@ -55,6 +56,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                             ServicePointManager.DefaultConnectionLimit = int.MaxValue;
                             var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
                             _httpClient = new HttpClient(compressionHandler);
+                            _httpClient.Timeout = TimeSpan.FromMinutes(5);// System.Threading.Timeout.InfiniteTimeSpan; //https://stackoverflow.com/a/46877380
                         }
                     }
                 }
@@ -64,38 +66,38 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
         public BaseClientHttpService.ProcessAuthenticationHandler ProcessAuthentication
         {
-            get  { return _processAuthenticationHandler; }
-            set  { _processAuthenticationHandler = value; }
+            get { return _processAuthenticationHandler; }
+            set { _processAuthenticationHandler = value; }
         }
-		private Func<string> _aquireUserIdDelegate;
-		public Func<string> AquireUserIdDelegate
-		{
-			get
-			{
-				return this._aquireUserIdDelegate;
-			}
-			set
-			{
-				this._aquireUserIdDelegate = value;
-			}
-		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, "", "", "None")
-		{
-		}
-		public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, string authenticationType)
-		{
-			this.HttpUser = "";
-			this.HttpPassword = "";
-			this._controllerName = controllerName;
-			this.HttpServiceUrl = httpServiceUrl;
-			this.RestfulServerExtension = restfulServerExtension;
-			this.HttpRequestTimeout = requestTimeout;
-			this.HttpUser = httpUser;
-			this.HttpPassword = httpPassword;
+        private Func<string> _aquireUserIdDelegate;
+        public Func<string> AquireUserIdDelegate
+        {
+            get
+            {
+                return this._aquireUserIdDelegate;
+            }
+            set
+            {
+                this._aquireUserIdDelegate = value;
+            }
+        }
+        public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension) : this(controllerName, httpServiceUrl, requestTimeout, restfulServerExtension, "", "", "None")
+        {
+        }
+        public BaseClientHttpService(string controllerName, string httpServiceUrl, int requestTimeout, string restfulServerExtension, string httpUser, string httpPassword, string authenticationType)
+        {
+            this.HttpUser = "";
+            this.HttpPassword = "";
+            this._controllerName = controllerName;
+            this.HttpServiceUrl = httpServiceUrl;
+            this.RestfulServerExtension = restfulServerExtension;
+            this.HttpRequestTimeout = requestTimeout;
+            this.HttpUser = httpUser;
+            this.HttpPassword = httpPassword;
             this.AuthenticationType = authenticationType.ToType<AuthenticationType>();
 
-			this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
-		}
+            this.AquireUserIdDelegate = new Func<string>(Handlers.AquireUserId);
+        }
 
         public T GetHttpRequestObject<T>(string url)
         {
@@ -133,36 +135,36 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         }
 
         public string RequestUrl(string method)
-		{
-			return this.RequestUrl(method, "");
-		}
-		public string RequestUrl(string method, string[] suffix)
-		{
-			return this.RequestUrl(method, string.Join("/", suffix));
-		}
-		public string RequestUrl(string method, string suffix)
-		{
-			var userId = this.AquireUserIdDelegate();
+        {
+            return this.RequestUrl(method, "");
+        }
+        public string RequestUrl(string method, string[] suffix)
+        {
+            return this.RequestUrl(method, string.Join("/", suffix));
+        }
+        public string RequestUrl(string method, string suffix)
+        {
+            var userId = this.AquireUserIdDelegate();
 
             return this.HttpServiceUrl.PathCombine(this._controllerName + this.RestfulServerExtension, "/")
                 .PathCombine(method, "/")
                 .PathCombine(userId, "/")
                 .PathCombine(suffix, "/");
-		}
-		
+        }
+
         public byte[] GetData(Dictionary<string, string> formFields, Encoding encoding)
-		{
-			var sb = new StringBuilder();
+        {
+            var sb = new StringBuilder();
             foreach (var field in formFields.Keys)
-			{
-				sb.AppendFormat(string.Format("{0}={1}&", field, formFields[field]), new object[0]);
-			}
-			return encoding.GetBytes(sb.ToString());
-		}
-		private string ResolveController(string controllerName)
-		{
-			return controllerName + this.RestfulServerExtension;
-		}
+            {
+                sb.AppendFormat(string.Format("{0}={1}&", field, formFields[field]), new object[0]);
+            }
+            return encoding.GetBytes(sb.ToString());
+        }
+        private string ResolveController(string controllerName)
+        {
+            return controllerName + this.RestfulServerExtension;
+        }
 
         private string getResponse(string url, int timeOut)
         {
@@ -200,12 +202,18 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
                         this.ProcessAuthentication(requestMessage, HttpUser, HttpPassword, ref _token);
 
+                    var cancellationToken = new CancellationTokenSource(); //https://stackoverflow.com/a/46877380
                     if (timeOut > 0)
+                    {
                         ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLeaseTimeout = timeOut;    //todo: overhead?
+                        cancellationToken.CancelAfter(TimeSpan.FromMilliseconds(timeOut));
+                    }
+                    else
+                        cancellationToken.CancelAfter(httpClient.Timeout);  //probably unneeded.  match whatever large limit is on client
 
                     if (Logging.IsDebugEnabled)
                         Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
-                    using (var response = await httpClient.SendAsync(requestMessage).ConfigureAwait(false))
+                    using (var response = await httpClient.SendAsync(requestMessage, cancellationToken.Token).ConfigureAwait(false))
                     {
 
                         responseText = await response.Content.ReadAsStringAsync(); //CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
