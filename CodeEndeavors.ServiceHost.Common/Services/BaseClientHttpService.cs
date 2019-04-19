@@ -56,7 +56,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                             ServicePointManager.DefaultConnectionLimit = int.MaxValue;
                             var compressionHandler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
                             _httpClient = new HttpClient(compressionHandler);
-                            _httpClient.Timeout = TimeSpan.FromMinutes(5);// System.Threading.Timeout.InfiniteTimeSpan; //https://stackoverflow.com/a/46877380
+                            _httpClient.Timeout = System.Threading.Timeout.InfiniteTimeSpan; //https://stackoverflow.com/a/46877380
                         }
                     }
                 }
