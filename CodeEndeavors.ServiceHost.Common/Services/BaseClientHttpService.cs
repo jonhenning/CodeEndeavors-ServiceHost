@@ -110,8 +110,13 @@ namespace CodeEndeavors.ServiceHost.Common.Services
 
         public T GetHttpRequestObject<T>(string url, object body)
         {
+            return GetHttpRequestObject<T>(url, body, this.HttpRequestTimeout);
+        }
+
+        public T GetHttpRequestObject<T>(string url, object body, int httpRequestTimeout)
+        {
             var jsonRequest = body != null ? body.ToJson(false, null, true) : null;
-            var jsonResponse = this.getResponse(url, jsonRequest, this.HttpRequestTimeout, Encoding.UTF8, "application/json");
+            var jsonResponse = this.getResponse(url, jsonRequest, httpRequestTimeout, Encoding.UTF8, "application/json");
 
             if (jsonResponse.StartsWith("{\"Message\":\""))
             {
