@@ -27,6 +27,24 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             return result;
         }
 
+        public static async Task<ServiceResult<T>> ExecuteServiceResultAsync<T>(Func<ServiceResult<T>, Task> codeFunc) //where T : new()
+        {
+            var result = new ServiceResult<T>(true);
+            try
+            {
+                await codeFunc.Invoke(result);
+            }
+            catch (Exception ex)
+            {
+                result.AddException(ex);
+            }
+            finally
+            {
+                result.StopTimer();
+            }
+            return result;
+        }
+
         public static void HandleAssemblyResolve()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;

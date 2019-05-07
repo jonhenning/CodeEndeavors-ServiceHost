@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace CodeEndeavors.ServiceHost
@@ -92,6 +93,10 @@ namespace CodeEndeavors.ServiceHost
         protected ServiceResult<T> ExecuteServiceResult<T>(Action<ServiceResult<T>> codeFunc) //where T : new()
         {
             return Helpers.ExecuteServiceResult<T>(codeFunc);
+        }
+        protected Task<ServiceResult<T>> ExecuteServiceResultAsync<T>(Func<ServiceResult<T>, Task> codeFunc) //where T : new()
+        {
+            return Helpers.ExecuteServiceResultAsync<T>(codeFunc);
         }
 
         protected string GetConnectionString(string key, string defaultValue)
