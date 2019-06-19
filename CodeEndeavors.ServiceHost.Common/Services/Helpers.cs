@@ -62,8 +62,8 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                     Logging.Debug("CurrentDomain_AssemblyResolve: {0} != {1}", name.Name, args.Name);
                     _resolvedNames[name.Name] = System.Reflection.Assembly.LoadWithPartialName(name.Name);
                 }
-                else
-                    Logging.Debug("CurrentDomain_AssemblyResolve (cached): {0} != {1}", name.Name, args.Name);
+                //else
+                //    Logging.Debug("CurrentDomain_AssemblyResolve (cached): {0} != {1}", name.Name, args.Name);
                 return _resolvedNames[name.Name];
             }
             return null;    //should never happen
