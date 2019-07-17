@@ -46,7 +46,7 @@ namespace CodeEndeavors.ServiceHost
             Common.Services.Logging.Debug("Watching folder {0} for updates", UpdateDir);
             ApplyUpdates();
             //using cache dependency to easily monitor update folder for changes
-            HttpRuntime.Cache.Add("_updates", "", new CacheDependency(UpdateDir), Cache.NoAbsoluteExpiration, TimeSpan.FromHours(1), CacheItemPriority.NotRemovable, new CacheItemRemovedCallback(OnFolderChanged));
+            HttpRuntime.Cache.Add("_updates", "", new CacheDependency(UpdateDir), Cache.NoAbsoluteExpiration, TimeSpan.FromHours(12), CacheItemPriority.NotRemovable, new CacheItemRemovedCallback(OnFolderChanged));
             Initialized = true;
         }
 
@@ -58,7 +58,7 @@ namespace CodeEndeavors.ServiceHost
 
         private static void HandleFolderChanged(bool afterErrorTry)
         {
-            HttpRuntime.Cache.Add("_updates", "", new CacheDependency(UpdateDir), Cache.NoAbsoluteExpiration, TimeSpan.FromHours(1), CacheItemPriority.NotRemovable, new CacheItemRemovedCallback(OnFolderChanged));
+            HttpRuntime.Cache.Add("_updates", "", new CacheDependency(UpdateDir), Cache.NoAbsoluteExpiration, TimeSpan.FromHours(12), CacheItemPriority.NotRemovable, new CacheItemRemovedCallback(OnFolderChanged));
             try
             {
                 ApplyUpdates();
