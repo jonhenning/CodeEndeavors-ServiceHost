@@ -1,0 +1,58 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build & Run Server",
+            "dependsOrder": "sequence",
+            "group": "build",
+            "dependsOn": [
+                "Build ASP.NET",
+                "Run IIS EXPRESS"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Build ASP.NET",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "args": [
+                "/property:GenerateFullPaths=true"
+            ],
+            "windows": {
+                "command": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\msbuild.exe"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "shell",
+            "label": "Run IIS EXPRESS",
+            "group": "build",
+            "windows": {
+                "command": "C:\\Program Files\\IIS Express\\iisexpress.exe"
+            },
+            "args": [
+                "/path:${workspaceRoot}\\CodeEndeavors.ServiceHost",
+                "/port:4000"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        }
+    ],
+
+}
