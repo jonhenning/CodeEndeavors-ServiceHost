@@ -1,15 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3B4F11FD-5654-4F6C-B563-BBDA8D804CDA}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeEndeavors.ServiceHost", "CodeEndeavors.ServiceHost\CodeEndeavors.ServiceHost.csproj", "{8406CAA9-26A0-407B-9C8C-BE52C67134DD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{EC8A8E85-4F66-498F-AF94-A8EF4C41B428} = {EC8A8E85-4F66-498F-AF94-A8EF4C41B428}
@@ -58,5 +51,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F09269CD-4B54-4047-B51C-4D2CDA764058}
 	EndGlobalSection
 EndGlobal
