@@ -14,6 +14,27 @@
         },
         {
             "type": "shell",
+            "label": "Nuget Restore",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "windows": {
+                "command": "${workspaceRoot}\\nuget.exe"
+            },
+            "args": [
+                "restore",
+                "${workspaceRoot}\\ServiceHost.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },        
+        {
+            "type": "shell",
             "label": "Build ASP.NET",
             "group": "build",
             "presentation": {
@@ -28,9 +49,12 @@
                 "/property:GenerateFullPaths=true"
             ],
             "windows": {
-                "command": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\msbuild.exe"
+                "command": "C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\msbuild.exe"
             },
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "dependsOn": [
+                "Nuget Restore"
+            ]
         },
         {
             "type": "shell",
