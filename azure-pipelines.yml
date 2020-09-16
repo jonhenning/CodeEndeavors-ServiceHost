@@ -13,7 +13,9 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  PackageVersion: '2.1.$(Build.BuildID).0'
+  Version.MajorMinor: '2.1'
+  Version.Revision: $[counter(variables['Version.MajorMinor'], 94)]
+  PackageVersion: '$(Version.MajorMinor).$(Version.Revision)'
 
 steps:
 - task: NuGetToolInstaller@1
