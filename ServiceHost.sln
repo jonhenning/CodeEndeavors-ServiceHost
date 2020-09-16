@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeEndeavors.ServiceHost.P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeEndeavors.ServiceHost.Plugins.ApplicationInsights", "CodeEndeavors.ServiceHost.Plugins.ApplicationInsights\CodeEndeavors.ServiceHost.Plugins.ApplicationInsights.csproj", "{A605052D-7FAA-4B18-A8FA-A79E59067946}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler", "CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler\CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler.csproj", "{DEE10E4D-8576-4EA8-865B-ECB8614FD993}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{A605052D-7FAA-4B18-A8FA-A79E59067946}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A605052D-7FAA-4B18-A8FA-A79E59067946}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A605052D-7FAA-4B18-A8FA-A79E59067946}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE10E4D-8576-4EA8-865B-ECB8614FD993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE10E4D-8576-4EA8-865B-ECB8614FD993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE10E4D-8576-4EA8-865B-ECB8614FD993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE10E4D-8576-4EA8-865B-ECB8614FD993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,3 +9,5 @@ redist/*.pdb
 bin/
 obj/
 packages/
+.vs/
+*.log

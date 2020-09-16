@@ -1,5 +1,6 @@
 ﻿using CodeEndeavors.Extensions;
 using CodeEndeavors.ServiceHost.Common.Services;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public TimeSpan ExecutionTime;
         public TimeSpan ServerExecutionTime;
         public string StatusMessage;
+        private IServiceHostProfilerCapture _profilerCapture;
         //public string LoggerKey;
         public bool Success;
         private List<string> _errors;
@@ -147,7 +149,13 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         {
             return Execute(result =>
             {
-                result.ReportResult(codeFunc.Invoke(), true);
+                using (var capture = Timeline.Capture("ClientCommandResult.Execute"))
+                {
+                    var sr = codeFunc.Invoke();
+                    result.ReportResult(sr, true);
+                    if (capture != null)
+                        capture.AppendResults(sr.ProfilerResults);
+                }
             });
         }
 
