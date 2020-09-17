@@ -23,6 +23,10 @@ namespace CodeEndeavors.ServiceHost.Plugins.PerformanceMonitor
             {
                 app.Use(typeof(StackExchangeProfilerMiddleware));
             }
+            if (this.GetConfigSetting("Profiler.EF6", true))
+            {
+                StackExchange.Profiling.EntityFramework6.MiniProfilerEF6.Initialize();
+            }
         }
     }
 }
