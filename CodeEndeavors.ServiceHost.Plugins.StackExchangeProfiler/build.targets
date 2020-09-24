@@ -42,6 +42,7 @@
              $(TargetDir)$(ExternalClientName).dll.config;
              $(TargetDir)$(ExternalClientName).pdb;
              $(TargetDir)MiniProfiler.dll;
+             $(TargetDir)MiniProfiler.EntityFramework6.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
         <Copy SourceFiles="$(TargetDir)$(ExternalClientName).dll;" DestinationFolder="$(RedistDir)" />
         
