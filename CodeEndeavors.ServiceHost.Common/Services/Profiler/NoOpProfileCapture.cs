@@ -23,9 +23,9 @@ namespace CodeEndeavors.ServiceHost.Common.Services.Profiler
         {
         }
 
-        public void Step(string name)
+        public IDisposable CustomTiming(string category, string commandString)
         {
-
+            return new NoOpDisposable();
         }
 
         public void Dispose()

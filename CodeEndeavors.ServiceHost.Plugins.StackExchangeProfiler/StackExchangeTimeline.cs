@@ -1,69 +1,48 @@
-﻿using CodeEndeavors.Extensions;
-using CodeEndeavors.ServiceHost.Common.Services.Profiler;
+﻿using System;
 using StackExchange.Profiling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 
 namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
 {
     public class StackExchangeTimeline : IServiceHostProfilerCapture
     {
-        CustomTiming _timing = null;
+        private IDisposable _step = null;
         private string _timingJson = null;
-        private Timing _serverTiming = null;
         public StackExchangeTimeline(string eventName)
         {
-            _timing = MiniProfiler.Current.CustomTiming("ServiceHost", eventName);
+            _step = MiniProfiler.Current?.Step(eventName);
         }
 
         public string Results
         {
             get
             {
-                if (_timing != null)
-                {
-                    _timing.Stop();
-                    _timingJson = MiniProfiler.Current?.Root?.ToJson();
-                    _timing = null;
-                }
+                if (_timingJson == null)
+                    _timingJson = MiniProfiler.ToJson();
                 return _timingJson;
             }
         }
 
         public void AppendResults(string results)
         {
-            //try
-            //{
             if (!string.IsNullOrEmpty(results))
             {
-                _serverTiming = results.ToObject<Timing>();
+                var profiler = MiniProfiler.FromJson(results);
+                profiler?.Root?.Children.ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
             }
-            //}
-            //catch (Exception ex)
-            //{
-                //TODO: LOG IT
-            //}
         }
 
-        public void Step(string name)
+        public IDisposable CustomTiming(string category, string commandString)
         {
-            MiniProfiler.Current?.Step(name);
+            IDisposable ret = (IDisposable)MiniProfiler.Current?.CustomTiming(category, commandString);
+            return ret != null ? ret : new NoOpDisposable();
         }
 
         public void Dispose()
         {
-            if (_timing != null)
-            {
-                _timing.Stop();
-                _timing = null;
-            }
-            if (_serverTiming != null)
-            {
-                MiniProfiler.Current?.Root?.AddChild(_serverTiming);
-            }
+            _step?.Dispose();
         }
     }
+
+
 }

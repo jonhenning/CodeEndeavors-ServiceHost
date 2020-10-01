@@ -70,7 +70,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             this._messages = new List<string>();
             this._errors = new List<string>();
             this._watch = new Stopwatch();
-            _profilerCapture = Timeline.Capture("ServiceResult");
+            _profilerCapture = Timeline.Capture("ServiceResult Results");
             if (startTimer)
             {
                 this.StartTimer();

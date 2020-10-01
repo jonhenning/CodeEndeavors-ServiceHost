@@ -1,4 +1,5 @@
 ﻿using CodeEndeavors.Extensions;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 using CodeEndeavors.ServiceHost.Extensions;
 using System;
 using System.Collections.Generic;
@@ -194,43 +195,44 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             string responseText = "";
             try
             {
-                using (var requestMessage = createHttpRequestMessage(url, body, contentType))
+                using (var capture = Timeline.Capture("ServiceHost Call: " + url))
                 {
-                    var timer = new System.Diagnostics.Stopwatch();
-                    timer.Start();
-
-                    if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
-                        this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
-                    else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
-                        this.ProcessAuthentication = Handlers.ProcessOAuth;
-
-                    if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
-                        this.ProcessAuthentication(requestMessage, HttpUser, HttpPassword, ref _token);
-
-                    var cancellationToken = new CancellationTokenSource(); //https://stackoverflow.com/a/46877380
-                    if (timeOut > 0)
+                    using (var requestMessage = createHttpRequestMessage(url, body, contentType))
                     {
-                        ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLeaseTimeout = timeOut;    //todo: overhead?
-                        cancellationToken.CancelAfter(TimeSpan.FromMilliseconds(timeOut));
-                    }
-                    else
-                        cancellationToken.CancelAfter(httpClient.Timeout);  //probably unneeded.  match whatever large limit is on client
+                        var timer = new System.Diagnostics.Stopwatch();
+                        timer.Start();
 
-                    if (Logging.IsDebugEnabled)
-                        Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
-                    using (var response = await httpClient.SendAsync(requestMessage, cancellationToken.Token).ConfigureAwait(false))
-                    {
+                        if (this.AuthenticationType == AuthenticationType.BasicAuthentication && this.ProcessAuthentication == null)
+                            this.ProcessAuthentication = Handlers.ProcessBasicAuthentication;
+                        else if (this.AuthenticationType == AuthenticationType.OAuth2 && this.ProcessAuthentication == null)
+                            this.ProcessAuthentication = Handlers.ProcessOAuth;
 
-                        responseText = await response.Content.ReadAsStringAsync(); //CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
+                        if (this.AuthenticationType != AuthenticationType.None && this.ProcessAuthentication != null)
+                            this.ProcessAuthentication(requestMessage, HttpUser, HttpPassword, ref _token);
+
+                        var cancellationToken = new CancellationTokenSource(); //https://stackoverflow.com/a/46877380
+                        if (timeOut > 0)
+                        {
+                            ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLeaseTimeout = timeOut;    //todo: overhead?
+                            cancellationToken.CancelAfter(TimeSpan.FromMilliseconds(timeOut));
+                        }
+                        else
+                            cancellationToken.CancelAfter(httpClient.Timeout);  //probably unneeded.  match whatever large limit is on client
 
                         if (Logging.IsDebugEnabled)
+                            Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Request: {0} \r\n{1}", url, body != null ? body.GetLogRequest() : "");
+                        using (var response = await httpClient.SendAsync(requestMessage, cancellationToken.Token).ConfigureAwait(false))
                         {
-                            //Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Response: {0}", response.StatusCode);
-                            Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
-                        }
+                            responseText = await response.Content.ReadAsStringAsync(); //CodeEndeavors.ServiceHost.Extensions.HttpExtensions.GetText(response);
+                            if (Logging.IsDebugEnabled)
+                            {
+                                //Logging.Log(Logging.LoggingLevel.Debug, "GetHttp Response: {0}", response.StatusCode);
+                                Logging.Log(Logging.LoggingLevel.Debug, response.GetLogResponse(responseText, 255));
+                            }
 
-                        if (timer.ElapsedMilliseconds > 700)
-                            Logging.Log(Logging.LoggingLevel.Info, "LONG RUNNING REQUEST: {0}ms {1} \r\n{2}", timer.ElapsedMilliseconds, url, body != null ? body.GetLogRequest() : "");
+                            if (timer.ElapsedMilliseconds > 700)
+                                Logging.Log(Logging.LoggingLevel.Info, "LONG RUNNING REQUEST: {0}ms {1} \r\n{2}", timer.ElapsedMilliseconds, url, body != null ? body.GetLogRequest() : "");
+                        }
                     }
                 }
             }
@@ -239,6 +241,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
                 Logging.Error("FAIL: " + ex.Message);
                 throw new Exception(url.GetLogResponse(ex));
             }
+
             return responseText;
         }
 
