@@ -26,7 +26,7 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
                 if (_timing != null)
                 {
                     _timing.Stop();
-                    _timingJson = MiniProfiler.Current.Root.ToJson();
+                    _timingJson = MiniProfiler.Current?.Root?.ToJson();
                     _timing = null;
                 }
                 return _timingJson;
@@ -48,6 +48,11 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
             //}
         }
 
+        public void Step(string name)
+        {
+            MiniProfiler.Current?.Step(name);
+        }
+
         public void Dispose()
         {
             if (_timing != null)
@@ -57,7 +62,7 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
             }
             if (_serverTiming != null)
             {
-                MiniProfiler.Current.Root.AddChild(_serverTiming);
+                MiniProfiler.Current?.Root?.AddChild(_serverTiming);
             }
         }
     }

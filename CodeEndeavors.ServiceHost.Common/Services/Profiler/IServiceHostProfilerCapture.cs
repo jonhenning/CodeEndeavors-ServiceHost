@@ -10,5 +10,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services.Profiler
     {
         string Results { get; }
         void AppendResults(string results);
+        void Step(string name);
     };
 }

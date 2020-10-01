@@ -23,6 +23,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services.Profiler
         {
         }
 
+        public void Step(string name)
+        {
+
+        }
+
         public void Dispose()
         {
 
