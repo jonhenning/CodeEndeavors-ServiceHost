@@ -17,12 +17,11 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public double ExecutionTime;
         public string StatusMessage;
         public bool Success;
-        public string ProfilerResults;
+        public string ProfilerResults { get; set; }
         //public string LoggerKey;
         private List<string> _errors;
         private List<string> _messages;
         private Stopwatch _watch;
-        private IServiceHostProfilerCapture _profilerCapture;
         private List<Func<ServiceResult<T>, Exception, bool>> _exceptionHandlers = new List<Func<ServiceResult<T>, Exception, bool>>();
 
         public T Data
@@ -70,7 +69,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             this._messages = new List<string>();
             this._errors = new List<string>();
             this._watch = new Stopwatch();
-            _profilerCapture = Timeline.Capture("ServiceResult Results");
             if (startTimer)
             {
                 this.StartTimer();
@@ -83,11 +81,6 @@ namespace CodeEndeavors.ServiceHost.Common.Services
             this.StopTimer();
             if (Logging.IsDebugEnabled)
                 Logging.Log(Logging.LoggingLevel.Debug, this.ToString());
-            if (_profilerCapture != null)
-            {
-                this.ProfilerResults = _profilerCapture.Results;
-                _profilerCapture.Dispose();
-            }
         }
         public void AddException(Exception ex)
         {

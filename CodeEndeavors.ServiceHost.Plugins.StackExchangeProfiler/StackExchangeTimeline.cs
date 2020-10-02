@@ -8,9 +8,11 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
     {
         private IDisposable _step = null;
         private string _timingJson = null;
+        private string _results = null;
+
         public StackExchangeTimeline(string eventName)
         {
-            _step = MiniProfiler.Current?.Step(eventName);
+            _step = MiniProfiler.Current?.Step(eventName + " " + StackExchange.Profiling.Helpers.StackTraceSnippet.Get());
         }
 
         public string Results
@@ -25,12 +27,17 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
 
         public void AppendResults(string results)
         {
-            if (!string.IsNullOrEmpty(results))
-            {
-                var profiler = MiniProfiler.FromJson(results);
-                profiler?.Root?.Children.ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
-            }
+            _results = results;
         }
+        //public void AppendResults(string results)
+        //{
+        //    if (!string.IsNullOrEmpty(results))
+        //    {
+        //        var profiler = MiniProfiler.FromJson(results);
+        //        //profiler?.Root?.Children.ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
+        //        profiler?.GetTimingHierarchy().ToList().ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
+        //    }
+        //}
 
         public IDisposable CustomTiming(string category, string commandString)
         {
@@ -41,6 +48,11 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
         public void Dispose()
         {
             _step?.Dispose();
+            if (!string.IsNullOrEmpty(_results))
+            {
+                var profiler = MiniProfiler.FromJson(_results);
+                profiler?.Root?.Children.ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
+            }
         }
     }
 

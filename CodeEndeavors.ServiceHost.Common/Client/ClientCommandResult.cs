@@ -16,7 +16,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public TimeSpan ExecutionTime;
         public TimeSpan ServerExecutionTime;
         public string StatusMessage;
-        private IServiceHostProfilerCapture _profilerCapture;
+        public string ProfilerResults { get; set; }
         //public string LoggerKey;
         public bool Success;
         private List<string> _errors;
@@ -64,6 +64,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.ServerExecutionTime = new TimeSpan(0, 0, 0, (int)Math.Round(result.ExecutionTime / 1000.0), (int)Math.Round(result.ExecutionTime % 1000.0));
             this.Errors.AddRange(result.Errors);
             this.Messages.AddRange(result.Messages);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -74,6 +75,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.Data = result.Data;
             this.ServerExecutionTime = result.ServerExecutionTime;
             this.Errors.AddRange(result.Errors);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -84,6 +86,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.Data = data;
             this.ServerExecutionTime = result.ServerExecutionTime;
             this.Errors.AddRange(result.Errors);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -129,33 +132,32 @@ namespace CodeEndeavors.ServiceHost.Common.Client
 
         public static ClientCommandResult<TData> Execute(Action<ClientCommandResult<TData>> codeFunc)
         {
-            var result = new ClientCommandResult<TData>(true);
-            try
+            using (var capture = Timeline.Capture("ClientCommandResult.Execute"))
             {
-                codeFunc.Invoke(result);
+                var result = new ClientCommandResult<TData>(true);
+                try
+                {
+                    codeFunc.Invoke(result);
+                }
+                catch (Exception ex)
+                {
+                    result.AddException(ex);
+                }
+                finally
+                {
+                    result.StopTimer();
+                    capture?.AppendResults(result.ProfilerResults);
+                }
+                return result;
             }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            finally
-            {
-                result.StopTimer();
-            }
-            return result;
         }
 
         public static ClientCommandResult<TData> Execute(Func<ServiceResult<TData>> codeFunc)
         {
             return Execute(result =>
             {
-                using (var capture = Timeline.Capture("ClientCommandResult.Execute"))
-                {
-                    var sr = codeFunc.Invoke();
-                    result.ReportResult(sr, true);
-                    if (capture != null)
-                        capture.AppendResults(sr.ProfilerResults);
-                }
+                var sr = codeFunc.Invoke();
+                result.ReportResult(sr, true);
             });
         }
 
