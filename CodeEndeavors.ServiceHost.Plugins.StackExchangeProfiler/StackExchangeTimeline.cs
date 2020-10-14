@@ -1,6 +1,7 @@
 ﻿using System;
 using StackExchange.Profiling;
 using CodeEndeavors.ServiceHost.Common.Services.Profiler;
+using CodeEndeavors.Extensions;
 
 namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
 {
@@ -20,7 +21,8 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
             get
             {
                 if (_timingJson == null)
-                    _timingJson = MiniProfiler.ToJson();
+                    _timingJson = MiniProfiler.Current?.Root?.Children.ToJson();
+                //_timingJson = MiniProfiler.ToJson();
                 return _timingJson;
             }
         }
