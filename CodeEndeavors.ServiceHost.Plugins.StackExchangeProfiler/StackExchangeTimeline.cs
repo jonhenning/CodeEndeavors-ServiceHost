@@ -2,6 +2,8 @@
 using StackExchange.Profiling;
 using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 using CodeEndeavors.Extensions;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
 {
@@ -10,9 +12,13 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
         private IDisposable _step = null;
         private string _timingJson = null;
         private string _results = null;
+        private decimal? _startMilliseconds = null;
+        private Stopwatch _sw = new Stopwatch();
 
         public StackExchangeTimeline(string eventName)
         {
+            _startMilliseconds = MiniProfiler.Current?.Head.StartMilliseconds;
+            _sw.Start();
             _step = MiniProfiler.Current?.Step(eventName + " " + StackExchange.Profiling.Helpers.StackTraceSnippet.Get());
         }
 
@@ -50,10 +56,20 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
         public void Dispose()
         {
             _step?.Dispose();
+            _sw.Stop();
             if (!string.IsNullOrEmpty(_results))
             {
-                var profiler = MiniProfiler.FromJson(_results);
-                profiler?.Root?.Children.ForEach(child => MiniProfiler.Current?.Head?.AddChild(child));
+                //var profiler = MiniProfiler.FromJson(_results);
+                var children = _results.ToObject<List<Timing>>();
+                children.ForEach(child =>
+                {
+                    if (_startMilliseconds.HasValue)
+                    {
+                        child.StartMilliseconds = _startMilliseconds.Value;
+                        child.DurationMilliseconds = _sw.ElapsedMilliseconds;
+                    }
+                    MiniProfiler.Current?.Head?.AddChild(child);
+                });
             }
         }
     }
