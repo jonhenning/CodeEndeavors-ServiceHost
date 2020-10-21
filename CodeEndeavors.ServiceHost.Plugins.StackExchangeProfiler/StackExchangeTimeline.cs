@@ -17,7 +17,7 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
 
         public StackExchangeTimeline(string eventName)
         {
-            _startMilliseconds = MiniProfiler.Current?.Head.StartMilliseconds;
+            _startMilliseconds = MiniProfiler.Current?.Head?.StartMilliseconds;
             _sw.Start();
             _step = MiniProfiler.Current?.Step(eventName + " " + StackExchange.Profiling.Helpers.StackTraceSnippet.Get());
         }
@@ -27,7 +27,7 @@ namespace CodeEndeavors.ServiceHost.Plugins.StackExchangeProfiler
             get
             {
                 if (_timingJson == null)
-                    _timingJson = MiniProfiler.Current?.Root?.Children.ToJson();
+                    _timingJson = MiniProfiler.Current?.Root?.Children?.ToJson();
                 //_timingJson = MiniProfiler.ToJson();
                 return _timingJson;
             }
