@@ -68,6 +68,7 @@
     <Compile Include="Services\Helpers.cs" />
     <Compile Include="Services\Logging.cs" />
     <Compile Include="Services\Profiler\IServiceHostProfilerCapture.cs" />
+    <Compile Include="Services\Profiler\MemoryTimer.cs" />
     <Compile Include="Services\Profiler\NoOpDisposable.cs" />
     <Compile Include="Services\Profiler\NoOpProfileCapture.cs" />
     <Compile Include="Services\Profiler\Timeline.cs" />
