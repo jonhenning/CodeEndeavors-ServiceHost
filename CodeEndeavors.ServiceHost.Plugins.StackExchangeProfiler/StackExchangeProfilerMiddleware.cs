@@ -23,7 +23,7 @@ namespace CodeEndeavors.ServiceHost.Plugins.PerformanceMonitor
         {
             MiniProfiler.Start();
             await _next(env);
-            MiniProfiler.Stop();
+            MiniProfiler.Stop(true);    //discard the results... we don't keep them here
         }
     }
 }

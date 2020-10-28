@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using StackExchange.Profiling.Storage;
 
 namespace CodeEndeavors.ServiceHost.Plugins.PerformanceMonitor
 {
@@ -27,6 +28,8 @@ namespace CodeEndeavors.ServiceHost.Plugins.PerformanceMonitor
             {
                 StackExchange.Profiling.EntityFramework6.MiniProfilerEF6.Initialize();
             }
+            MultiStorageProvider multiStorage = new MultiStorageProvider(new HttpRuntimeCacheStorage(TimeSpan.FromMinutes(2))); //we are sending results down to the client, so we don't need to store anything here in cache...  
+            StackExchange.Profiling.MiniProfiler.Settings.Storage = multiStorage;
         }
     }
 }
