@@ -19,11 +19,11 @@ namespace CodeEndeavors.ServiceHost.Plugins.PerformanceMonitor
 
         public void Configure(IAppBuilder app, HttpConfiguration config)
         {
-            if (this.GetConfigSetting("Profiler.Enabled", true))
+            if (this.GetConfigSetting("Profiler.Enabled", false))
             {
                 app.Use(typeof(StackExchangeProfilerMiddleware));
             }
-            if (this.GetConfigSetting("Profiler.EF6", true))
+            if (this.GetConfigSetting("Profiler.EF6", false))
             {
                 StackExchange.Profiling.EntityFramework6.MiniProfilerEF6.Initialize();
             }
