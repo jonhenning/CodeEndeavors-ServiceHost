@@ -147,6 +147,10 @@ namespace CodeEndeavors.ServiceHost.Common.Client
                 {
                     result.StopTimer();
                     capture?.AppendResults(result.ProfilerResults);
+
+                    if (result.ServerExecutionTime != null && result.ServerExecutionTime.TotalMilliseconds > 0 && capture != null)
+                        using (var custom = capture?.CustomTiming("NETWORK LATENCY (App -> Web)", result.ExecutionTime.Subtract(result.ServerExecutionTime).TotalMilliseconds.ToString() + "ms" )) { };
+
                 }
                 return result;
             }
