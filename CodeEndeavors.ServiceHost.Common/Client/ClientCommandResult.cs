@@ -149,7 +149,10 @@ namespace CodeEndeavors.ServiceHost.Common.Client
                     capture?.AppendResults(result.ProfilerResults);
 
                     if (result.ServerExecutionTime != null && result.ServerExecutionTime.TotalMilliseconds > 0 && capture != null)
-                        using (var custom = capture?.CustomTiming("NETWORK LATENCY (App -> Web)", result.ExecutionTime.Subtract(result.ServerExecutionTime).TotalMilliseconds.ToString() + "ms" )) { };
+                    {
+                        using (var custom = capture?.CustomTiming("SERVER EXECUTION TIME (App)", result.ServerExecutionTime.TotalMilliseconds.ToString() + "ms")) { };
+                        using (var custom = capture?.CustomTiming("NETWORK LATENCY (App -> Web)", result.ExecutionTime.Subtract(result.ServerExecutionTime).TotalMilliseconds.ToString() + "ms")) { };
+                    }
 
                 }
                 return result;
