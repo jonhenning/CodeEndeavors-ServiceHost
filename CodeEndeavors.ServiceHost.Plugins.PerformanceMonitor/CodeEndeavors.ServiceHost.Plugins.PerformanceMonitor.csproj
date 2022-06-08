@@ -31,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CodeEndeavors.Extensions, Version=2.1.62.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CodeEndeavors.Extensions.2.1.62\lib\net45\CodeEndeavors.Extensions.dll</HintPath>
+    <Reference Include="CodeEndeavors.Extensions, Version=2.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CodeEndeavors.Extensions.2.1.1\lib\net45\CodeEndeavors.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="CodeEndeavors.ServicePerformanceMonitor, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CodeEndeavors.ServicePerformanceMonitor.1.0.4\lib\4.5\CodeEndeavors.ServicePerformanceMonitor.dll</HintPath>
