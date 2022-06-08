@@ -1,5 +1,6 @@
 ﻿using CodeEndeavors.Extensions;
 using CodeEndeavors.ServiceHost.Common.Services;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -56,19 +57,22 @@ namespace CodeEndeavors.ServiceHost.Common.Client
 
         public static T ExecuteClient<T>(Func<ClientCommandResult<T>> codeFunc) //where T : new()
         {
-            ClientCommandResult<T> clientCommandResult = codeFunc();
-            if (clientCommandResult.Success)
+            using (var capture = Timeline.Capture("BaseClient.ExecuteClient"))
             {
-                return clientCommandResult.Data;
-            }
-            if (Helpers.IsDebug)
-                throw new Exception(clientCommandResult.ToString());
-            else
-            {
-                if (clientCommandResult.Errors.Count == 1)
-                    throw new Exception(clientCommandResult.Errors[0]);
-                else 
-                    throw new Exception(clientCommandResult.Errors.ToJson());
+                ClientCommandResult<T> clientCommandResult = codeFunc();
+                if (clientCommandResult.Success)
+                {
+                    return clientCommandResult.Data;
+                }
+                if (Helpers.IsDebug)
+                    throw new Exception(clientCommandResult.ToString());
+                else
+                {
+                    if (clientCommandResult.Errors.Count == 1)
+                        throw new Exception(clientCommandResult.Errors[0]);
+                    else
+                        throw new Exception(clientCommandResult.Errors.ToJson());
+                }
             }
         }
 

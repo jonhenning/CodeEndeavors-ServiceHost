@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
+
 namespace CodeEndeavors.ServiceHost.Common.Services
 {
 
@@ -15,6 +17,7 @@ namespace CodeEndeavors.ServiceHost.Common.Services
         public double ExecutionTime;
         public string StatusMessage;
         public bool Success;
+        public string ProfilerResults { get; set; }
         //public string LoggerKey;
         private List<string> _errors;
         private List<string> _messages;

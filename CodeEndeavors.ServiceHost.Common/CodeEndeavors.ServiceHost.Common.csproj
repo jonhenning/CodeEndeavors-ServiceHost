@@ -40,6 +40,7 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http">
@@ -64,6 +65,11 @@
     <Compile Include="Services\Handlers.cs" />
     <Compile Include="Services\Helpers.cs" />
     <Compile Include="Services\Logging.cs" />
+    <Compile Include="Services\Profiler\IServiceHostProfilerCapture.cs" />
+    <Compile Include="Services\Profiler\MemoryTimer.cs" />
+    <Compile Include="Services\Profiler\NoOpDisposable.cs" />
+    <Compile Include="Services\Profiler\NoOpProfileCapture.cs" />
+    <Compile Include="Services\Profiler\Timeline.cs" />
     <Compile Include="Services\ServiceLocator.cs" />
     <Compile Include="Services\BaseClientHttpService.cs" />
     <Compile Include="Services\ServiceResult.cs" />

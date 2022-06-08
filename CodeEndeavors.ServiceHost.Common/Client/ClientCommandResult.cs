@@ -1,5 +1,6 @@
 ﻿using CodeEndeavors.Extensions;
 using CodeEndeavors.ServiceHost.Common.Services;
+using CodeEndeavors.ServiceHost.Common.Services.Profiler;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
         public TimeSpan ExecutionTime;
         public TimeSpan ServerExecutionTime;
         public string StatusMessage;
+        public string ProfilerResults { get; set; }
         //public string LoggerKey;
         public bool Success;
         private List<string> _errors;
@@ -62,6 +64,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.ServerExecutionTime = new TimeSpan(0, 0, 0, (int)Math.Round(result.ExecutionTime / 1000.0), (int)Math.Round(result.ExecutionTime % 1000.0));
             this.Errors.AddRange(result.Errors);
             this.Messages.AddRange(result.Messages);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -72,6 +75,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.Data = result.Data;
             this.ServerExecutionTime = result.ServerExecutionTime;
             this.Errors.AddRange(result.Errors);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -82,6 +86,7 @@ namespace CodeEndeavors.ServiceHost.Common.Client
             this.Data = data;
             this.ServerExecutionTime = result.ServerExecutionTime;
             this.Errors.AddRange(result.Errors);
+            this.ProfilerResults = result.ProfilerResults;
             this.StopTimer();
             if (Logger.IsDebugEnabled)
                 Logger.Debug(this.ToString());
@@ -127,27 +132,39 @@ namespace CodeEndeavors.ServiceHost.Common.Client
 
         public static ClientCommandResult<TData> Execute(Action<ClientCommandResult<TData>> codeFunc)
         {
-            var result = new ClientCommandResult<TData>(true);
-            try
+            using (var capture = Timeline.Capture("ClientCommandResult.Execute"))
             {
-                codeFunc.Invoke(result);
+                var result = new ClientCommandResult<TData>(true);
+                try
+                {
+                    codeFunc.Invoke(result);
+                }
+                catch (Exception ex)
+                {
+                    result.AddException(ex);
+                }
+                finally
+                {
+                    result.StopTimer();
+                    capture?.AppendResults(result.ProfilerResults);
+
+                    if (result.ServerExecutionTime != null && result.ServerExecutionTime.TotalMilliseconds > 0 && capture != null)
+                    {
+                        using (var custom = capture?.CustomTiming("SERVER EXECUTION TIME (App)", result.ServerExecutionTime.TotalMilliseconds.ToString() + "ms")) { };
+                        using (var custom = capture?.CustomTiming("NETWORK LATENCY (App -> Web)", result.ExecutionTime.Subtract(result.ServerExecutionTime).TotalMilliseconds.ToString() + "ms")) { };
+                    }
+
+                }
+                return result;
             }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            finally
-            {
-                result.StopTimer();
-            }
-            return result;
         }
 
         public static ClientCommandResult<TData> Execute(Func<ServiceResult<TData>> codeFunc)
         {
             return Execute(result =>
             {
-                result.ReportResult(codeFunc.Invoke(), true);
+                var sr = codeFunc.Invoke();
+                result.ReportResult(sr, true);
             });
         }
 

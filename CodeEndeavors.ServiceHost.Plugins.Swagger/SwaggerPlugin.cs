@@ -1,9 +1,14 @@
 ﻿using CodeEndeavors.Extensions;
 using Owin;
 using Swashbuckle.Application;
+using Swashbuckle.Swagger;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Web.Http;
+using System;
+using System.Web.Http.Description;
 
 namespace CodeEndeavors.ServiceHost.Plugins.Swagger
 {
@@ -141,7 +146,14 @@ namespace CodeEndeavors.ServiceHost.Plugins.Swagger
                     // Swagger docs and UI. However, if you have multiple types in your API with the same class name, you'll
                     // need to opt out of this behavior to avoid Schema Id conflicts.
                     //
-                    c.UseFullTypeNameInSchemaIds();
+                    //c.UseFullTypeNameInSchemaIds();
+                    c.SchemaId(x =>
+                    {
+                        return x.Assembly.CodeBase + "~" + x.FullName;
+                    });
+
+                    //Entity Framework creates circular references...  most of these are defined as virtual methods...  so exclude all of them and allow it to work instead of Out of Memory errors
+                    c.SchemaFilter<ExcludeVirtualPropertiesFilter>();
 
                     // In accordance with the built in JsonSerializer, Swashbuckle will, by default, describe enums as integers.
                     // You can change the serializer behavior by configuring the StringToEnumConverter globally or for a given
@@ -239,6 +251,24 @@ namespace CodeEndeavors.ServiceHost.Plugins.Swagger
             //https://github.com/domaindrivendev/Swashbuckle/issues/299
             config.Routes.MapHttpRoute("custom_swagger_ui_shortcut", helpUrl, null, null, new RedirectHandler(SwaggerDocsConfig.DefaultRootUrlResolver, helpUrl + "/index"));
 
+        }
+    }
+
+    public class ExcludeVirtualPropertiesFilter : ISchemaFilter
+    {
+        public void Apply(Schema schema, SchemaRegistry schemaRegistry, Type type)
+        {
+
+            if (schema?.properties == null)
+                return;
+
+            var excludedProperties = type.GetProperties().Where(p => (p.CanRead ? p.GetGetMethod(true) : p.GetSetMethod(true)).IsVirtual);
+            foreach (var excludedProperty in excludedProperties)
+            {
+                var propertyToRemove = schema.properties.Keys.SingleOrDefault(x => x.ToLower() == excludedProperty.Name.ToLower());
+                if (propertyToRemove != null)
+                    schema.properties.Remove(propertyToRemove);
+            }
         }
     }
 }

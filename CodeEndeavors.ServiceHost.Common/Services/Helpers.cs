@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeEndeavors.ServiceHost.Common.Services.Profiler;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +12,24 @@ namespace CodeEndeavors.ServiceHost.Common.Services
     {
         public static ServiceResult<T> ExecuteServiceResult<T>(Action<ServiceResult<T>> codeFunc) //where T : new()
         {
-            var result = new ServiceResult<T>(true);
-            try
+            using (var profilerCapture = Timeline.Capture("ExecuteServiceResult"))
             {
-                codeFunc.Invoke(result);
+                var result = new ServiceResult<T>(true);
+                try
+                {
+                    codeFunc.Invoke(result);
+                }
+                catch (Exception ex)
+                {
+                    result.AddException(ex);
+                }
+                finally
+                {
+                    result.StopTimer();
+                    result.ProfilerResults = profilerCapture.Results;
+                }
+                return result;
             }
-            catch (Exception ex)
-            {
-                result.AddException(ex);
-            }
-            finally
-            {
-                result.StopTimer();
-            }
-            return result;
         }
 
         public static async Task<ServiceResult<T>> ExecuteServiceResultAsync<T>(Func<ServiceResult<T>, Task> codeFunc) //where T : new()
