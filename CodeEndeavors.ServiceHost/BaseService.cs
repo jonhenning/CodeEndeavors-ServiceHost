@@ -108,13 +108,18 @@ namespace CodeEndeavors.ServiceHost
             var resolvedKey = string.Format("{0}.Properties.Settings.{1}", _satilliteName, key);
             try
             {
-                return Config.ConnectionStrings.ConnectionStrings[resolvedKey].ToString();
+                var val = Config.ConnectionStrings.ConnectionStrings[resolvedKey].ToString();
+                if (_getConnectionOverride != null)
+                {
+                    val = _getConnectionOverride(key, val);
+                }
+                return val;
             }
             catch (Exception ex)
             {
                 Logging.Error(ex, "GetConnectionString");
             }
-
+            
             return defaultValue;
         }
 
@@ -124,6 +129,20 @@ namespace CodeEndeavors.ServiceHost
             if (HttpContext.Current != null && HttpContext.Current.Items.Contains("ServiceHost.UserId"))
                 userId = HttpContext.Current.Items["ServiceHost.UserId"].ToString();
             return userId;
+        }
+
+        //support for encrypted connection strings
+        private static Func<string, string, string> _getConnectionOverride;
+        public static Func<string, string, string> GetConnectionOverride
+        {
+            get
+            {
+                return _getConnectionOverride;
+            }
+            set
+            {
+                _getConnectionOverride = value;
+            }
         }
 
     }
