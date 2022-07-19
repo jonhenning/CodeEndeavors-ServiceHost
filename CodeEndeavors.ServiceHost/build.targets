@@ -57,6 +57,7 @@
              $(TargetDir)Newtonsoft.Json.dll;
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
+             $(TargetDir)Microsoft.IO.RecyclableMemoryStream.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
              " WorkingDirectory="$(MSBuildProjectDirectory)" ZipFileName="$(RedistDir)\$(ExternalClientName).zip" />
@@ -78,6 +79,7 @@
              $(TargetDir)Newtonsoft.Json.dll;
              $(TargetDir)System.Net.Http.Extensions.Compression.Core.dll;
              $(TargetDir)Microsoft.AspNet.WebApi.Extensions.Compression.Server.dll;
+             $(TargetDir)Microsoft.IO.RecyclableMemoryStream.dll;
              $(TargetDir)NLog.dll;
              $(TargetDir)ICSharpCode.SharpZipLib.dll;
              $(MSBuildProjectDirectory)\web.config;
